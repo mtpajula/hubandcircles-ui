@@ -1,0 +1,106 @@
+{
+  "app": {
+    "title": "Hub & Circles",
+    "loading": "Loading…",
+    "routes": "Routes",
+    "map": "Map"
+  },
+  "nav": {
+    "backToTheme": "← {name} · {n} route | ← {name} · {n} routes"
+  },
+  "lang": {
+    "select": "Language",
+    "fi": "Suomi",
+    "en": "English"
+  },
+  "theme": {
+    "select": "Theme",
+    "all": "All routes"
+  },
+  "route": {
+    "length": "{km} km",
+    "ascent": "{m} m",
+    "lengthLabel": "Length",
+    "ascentLabel": "Ascent",
+    "difficulty": "Difficulty",
+    "open": "Open route",
+    "none": "No routes in this theme yet.",
+    "shown": "{shown} / {total} routes",
+    "keyFigures": "Key figures",
+    "elevationProfile": "Elevation profile"
+  },
+  "season": {
+    "summer": "Summer",
+    "autumn": "Autumn",
+    "winter": "Winter",
+    "spring": "Spring"
+  },
+  "difficulty": {
+    "easy": "Easy",
+    "moderate": "Moderate",
+    "demanding": "Demanding"
+  },
+  "error": {
+    "title": "Content could not be loaded",
+    "load": "Failed to load the data.",
+    "schemaVersion": "The data version is not supported. Please try again later.",
+    "route": "Failed to load the route."
+  },
+  "map": {
+    "attribution": "© OpenStreetMap contributors",
+    "legendTitle": "On the map",
+    "legendSelected": "Selected route",
+    "legendOthers": "Other routes",
+    "legendCoverage": "Topographic map coverage",
+    "legendIssue": "Reported issue",
+    "selected": "Selected: {name}",
+    "layers": "Layers",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
+  },
+  "report": {
+    "button": "Report a problem",
+    "requiresGithub": "requires a GitHub account"
+  },
+  "landing": {
+    "title": "Rovaniemi cycling routes on one map",
+    "titleMobile": "Rovaniemi cycling routes",
+    "lead": "Gravel, trail, road, touring and winter – pick your bike and the map shows the routes that suit it, with difficulty, surfaces and GPX files.",
+    "eyebrow": "What do you ride?",
+    "routeCount": "{n} route | {n} routes",
+    "allRoutes": "Open the map with all routes",
+    "shareNote": "Your choice is remembered, and the address can be shared:",
+    "pauseVideo": "Pause video",
+    "resumeVideo": "Resume video",
+    "videoHelp": "The video is silent and only shown on a fast connection. Pausing is remembered on this device.",
+    "scrollHint": "What is this site ↓",
+    "about": "About this site",
+    "aboutTitle": "Built by local riders",
+    "aboutText1": "The routes were ridden and described by local cyclists. This is not a municipal service: nobody plows, marks or inspects the routes for this site, and conditions change with the weather.",
+    "aboutText2": "Some routes use paths maintained by the municipality or another party, some do not. A route card tells you when there is no maintenance, with this notice:",
+    "noticeSample": "this is what the notice looks like",
+    "promise1Title": "Take the route with you",
+    "promise1Text": "Every route has a GPX file for your bike computer or phone. The map also works while you ride.",
+    "promise2Title": "Difficulty in words",
+    "promise2Text": "Difficulty is given in words and as an ITRS grade, never as color alone. Climbs and lengths come from the recorded track.",
+    "promise3Title": "Surface and traffic",
+    "promise3Text": "The route card shows how much is asphalt, gravel and trail, and where you share the road with cars.",
+    "promise4Title": "Report corrections",
+    "promise4Text": "A fallen tree, a new fence or a wrong surface? Every route has a button for reporting a correction.",
+    "sourcesTitle": "Where the data comes from",
+    "sourcesText": "Map data and surface information come from open sources. Route tracks and descriptions are the riders' own. Sources and their retrieval dates:",
+    "source1": "© OpenStreetMap contributors (ODbL)",
+    "source2": "© National Land Survey of Finland, topographic map (CC BY 4.0)",
+    "source3": "© Natural Resources Institute Finland, harvest forecasts",
+    "source4": "Municipal route register (Lipas)",
+    "source5": "Visit Finland, service data",
+    "disclaimerTitle": "At your own risk",
+    "disclaimerText": "You ride the routes at your own risk. Check the conditions, respect nature and landowners, and give way to pedestrians.",
+    "footerTitle": "Built by local riders",
+    "footerNote": "Not a municipal service. You ride at your own risk.",
+    "readMore": "Read more ↓"
+  },
+  "maintenance": {
+    "notice": "Not municipally maintained"
+  }
+}

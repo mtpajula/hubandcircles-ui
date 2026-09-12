@@ -1,0 +1,7 @@
+node_modules
+dist
+public/data
+src/types
+package-lock.json
+.claude
+*.md

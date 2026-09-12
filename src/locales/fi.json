@@ -1,0 +1,106 @@
+{
+  "app": {
+    "title": "Napa ja piirit",
+    "loading": "Ladataan…",
+    "routes": "Reitit",
+    "map": "Kartta"
+  },
+  "nav": {
+    "backToTheme": "← {name} · {n} reitti | ← {name} · {n} reittiä"
+  },
+  "lang": {
+    "select": "Kieli",
+    "fi": "Suomi",
+    "en": "English"
+  },
+  "theme": {
+    "select": "Teema",
+    "all": "Kaikki reitit"
+  },
+  "route": {
+    "length": "{km} km",
+    "ascent": "{m} m",
+    "lengthLabel": "Pituus",
+    "ascentLabel": "Nousu",
+    "difficulty": "Vaativuus",
+    "open": "Avaa reitti",
+    "none": "Tässä teemassa ei ole vielä reittejä.",
+    "shown": "{shown} / {total} reittiä",
+    "keyFigures": "Avainluvut",
+    "elevationProfile": "Korkeusprofiili"
+  },
+  "season": {
+    "summer": "Kesä",
+    "autumn": "Syksy",
+    "winter": "Talvi",
+    "spring": "Kevät"
+  },
+  "difficulty": {
+    "easy": "Helppo",
+    "moderate": "Keskivaativa",
+    "demanding": "Vaativa"
+  },
+  "error": {
+    "title": "Sisältöä ei voitu ladata",
+    "load": "Aineiston lataus epäonnistui.",
+    "schemaVersion": "Aineiston versio ei ole tuettu. Päivitä sivu myöhemmin.",
+    "route": "Reitin tietoja ei voitu ladata."
+  },
+  "map": {
+    "attribution": "© OpenStreetMap-tekijät",
+    "legendTitle": "Kartalla",
+    "legendSelected": "Valittu reitti",
+    "legendOthers": "Muut reitit",
+    "legendCoverage": "Maastokartan kattavuus",
+    "legendIssue": "Ongelmakohta",
+    "selected": "Valittu: {name}",
+    "layers": "Tasot",
+    "zoomIn": "Lähennä",
+    "zoomOut": "Loitonna"
+  },
+  "report": {
+    "button": "Ilmoita ongelmasta",
+    "requiresGithub": "vaatii GitHub-tunnuksen"
+  },
+  "landing": {
+    "title": "Rovaniemen pyöräreitit yhdellä kartalla",
+    "titleMobile": "Rovaniemen pyöräreitit",
+    "lead": "Sora, maasto, maantie, retki ja talvi – valitse pyörä, niin kartta näyttää sille sopivat reitit vaativuuksineen, pintoineen ja GPX-tiedostoineen.",
+    "eyebrow": "Millä pyörällä liikut?",
+    "routeCount": "{n} reitti | {n} reittiä",
+    "allRoutes": "Avaa kartta kaikilla reiteillä",
+    "shareNote": "Valinta muistetaan, ja osoite on jaettavissa:",
+    "pauseVideo": "Pysäytä video",
+    "resumeVideo": "Jatka videota",
+    "videoHelp": "Video on äänetön ja näytetään vain nopealla yhteydellä. Pysäytys muistetaan tällä laitteella.",
+    "scrollHint": "Mikä tämä sivusto on ↓",
+    "about": "Tietoa sivustosta",
+    "aboutTitle": "Harrastajien kokoama sivusto",
+    "aboutText1": "Reitit ovat paikallisten pyöräilijöiden ajamia ja kuvaamia. Tämä ei ole kunnan palvelu: kukaan ei auraa, merkitse tai tarkasta reittejä sivuston vuoksi, ja olosuhteet muuttuvat säiden mukaan.",
+    "aboutText2": "Osa reiteistä kulkee kunnan tai muun tahon ylläpitämillä väylillä, osa ei. Ylläpidon puute kerrotaan reittikortilla erikseen merkinnällä:",
+    "noticeSample": "tältä merkintä näyttää",
+    "promise1Title": "Vie reitti mukaasi",
+    "promise1Text": "Jokaisesta reitistä saa GPX-tiedoston pyörätietokoneeseen tai puhelimeen. Kartta toimii myös ajon aikana.",
+    "promise2Title": "Vaativuus sanoina",
+    "promise2Text": "Vaativuus kerrotaan sanoin ja ITRS-luokituksena, ei pelkkänä värinä. Nousut ja pituudet tulevat mitatusta jäljestä.",
+    "promise3Title": "Pinta ja liikenne",
+    "promise3Text": "Reittikortti näyttää, kuinka paljon on asfalttia, soraa ja polkua, ja missä ajetaan autoliikenteen seassa.",
+    "promise4Title": "Kerro korjauksista",
+    "promise4Text": "Kaatunut puu, uusi aita tai väärä pinta? Jokaisella reitillä on painike, jolla korjauksen voi ilmoittaa.",
+    "sourcesTitle": "Mistä tiedot tulevat",
+    "sourcesText": "Kartta-aineisto ja reittien pintatiedot tulevat avoimista lähteistä. Reittien jäljet ja kuvaukset ovat harrastajien omia. Lähteet ja niiden hakupäivät:",
+    "source1": "© OpenStreetMap-tekijät (ODbL)",
+    "source2": "© Maanmittauslaitos, maastokartta (CC BY 4.0)",
+    "source3": "© Luonnonvarakeskus, satoennusteet",
+    "source4": "Kunnan reittirekisteri (Lipas)",
+    "source5": "Visit Finland, palvelutiedot",
+    "disclaimerTitle": "Omalla vastuulla",
+    "disclaimerText": "Reitit ajetaan omalla vastuulla. Tarkista olosuhteet, kunnioita luontoa ja maanomistajia ja väistä jalankulkijoita.",
+    "footerTitle": "Harrastajien kokoama sivusto",
+    "footerNote": "Ei kunnan palvelu. Reitit ajetaan omalla vastuulla.",
+    "readMore": "Lue lisää ↓"
+  },
+  "maintenance": {
+    "notice": "Ei kunnan ylläpitämä"
+  }
+}
