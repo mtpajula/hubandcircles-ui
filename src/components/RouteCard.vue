@@ -4,18 +4,23 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useMediaQuery } from '../composables/mediaQuery'
 import { dataPath } from '../data/paths'
+import { cardTheme, presentationOf } from '../data/presentation'
 import { loadRoute } from '../data/route'
 import { filterRoutesByTheme } from '../data/routes'
-import { formatKm, formatM } from '../i18n/format'
 import { langText } from '../i18n/language'
 import { sectionComponent } from '../sections'
 import type { Catalog, Theme } from '../types/catalog'
 import type { PublishedRoute } from '../types/route'
+import GpxButton from './GpxButton.vue'
+import KeyFigures from './KeyFigures.vue'
+import MaintenanceNotice from './MaintenanceNotice.vue'
 import RouteBand from './RouteBand.vue'
+import ShareBar from './ShareBar.vue'
 
 /**
- * Route card panel (UI-SPEC 4.1–4.2, mobile 5.1) with the V1 fields of route.json. Blocks that
- * need V2 data (ITRS, hardest section, shares, services, GPX, ride mode) are marked as slots.
+ * Route card panel (UI-SPEC 4.1–4.2, mobile 5.1). The theme's `presentation` decides the key
+ * figures; under `all` the route's first theme is used. Blocks that need data not built yet
+ * (hardest section, services, ride mode) are marked as slots.
  */
 defineOptions({ inheritAttrs: false })
 const props = defineProps<{ catalog: Catalog; theme: Theme | null; lang: string }>()
@@ -75,6 +80,22 @@ const seasons = computed(() =>
 const coverImage = computed(() =>
   published.value?.cover_image ? dataPath(published.value.cover_image) : null,
 )
+const gpxHref = computed(() => (published.value?.gpx ? dataPath(published.value.gpx) : null))
+const presentation = computed(() =>
+  presentationOf(cardTheme(props.catalog.themes, props.theme, published.value?.themes ?? [])),
+)
+/** Share bars (UI-SPEC 4.2 item 6) for the shares that exist and are not a key figure already. */
+const shareBars = computed(() => {
+  const r = published.value
+  if (!r) return []
+  const shown = presentation.value.key_figures
+  const bars: { kind: 'itrs' | 'surface' | 'traffic'; shares: Record<string, number> }[] = []
+  if (r.itrs_technical_shares) bars.push({ kind: 'itrs', shares: r.itrs_technical_shares })
+  if (r.surface_shares && !shown.includes('surface_shares'))
+    bars.push({ kind: 'surface', shares: r.surface_shares })
+  if (r.traffic_shares) bars.push({ kind: 'traffic', shares: r.traffic_shares })
+  return bars.filter((b) => Object.keys(b.shares).length > 0)
+})
 </script>
 
 <template>
@@ -91,7 +112,8 @@ const coverImage = computed(() =>
       <RouterLink class="back" :to="{ name: 'theme', params: { lang, theme: themeId } }">
         {{ backLabel }}
       </RouterLink>
-      <!-- V2: GpxButton, ride mode button -->
+      <GpxButton :href="gpxHref" :bytes="published?.gpx_bytes" :lang="lang" />
+      <!-- V2: ride mode button -->
     </div>
     <p v-if="failed" class="status" role="alert">{{ t('error.route') }}</p>
     <p v-else-if="!published" class="status" role="status">{{ t('app.loading') }}</p>
@@ -104,34 +126,32 @@ const coverImage = computed(() =>
           <span v-if="published.difficulty" class="chip">
             {{ t('route.difficulty') }}: {{ label('difficulty', published.difficulty) }}
           </span>
-          <!-- V2: MaintenanceNotice pill -->
+          <MaintenanceNotice :route="published" variant="pill" interactive />
         </div>
       </div>
-      <!-- V2: MaintenanceNotice panel -->
+      <MaintenanceNotice
+        :route="published"
+        variant="panel"
+        :lang="lang"
+        :default-lang="defaultLang"
+      />
+      <!-- ponytail: block order per theme (UI-SPEC 4.2 intro) once M4 brings hero_image:
+           `hardest_section` themes keep key figures first, `cover_image` themes put the cover
+           and surface shares first. Until then key figures come first for every theme. -->
       <section class="block">
         <h2 class="eyebrow">{{ t('route.keyFigures') }}</h2>
-        <div class="tiles">
-          <!-- V2: KeyFigures in theme order (ITRS badges, shares) -->
-          <div class="tile">
-            <span class="tile-label">{{ t('route.lengthLabel') }}</span>
-            <span class="tile-value">
-              {{ t('route.length', { km: formatKm(lang, published.length_km) }) }}
-            </span>
-          </div>
-          <div v-if="published.ascent_m != null" class="tile">
-            <span class="tile-label">{{ t('route.ascentLabel') }}</span>
-            <span class="tile-value">
-              {{ t('route.ascent', { m: formatM(lang, published.ascent_m) }) }}
-            </span>
-          </div>
-        </div>
+        <KeyFigures :figures="presentation.key_figures" :route="published" :lang="lang" />
       </section>
       <!-- V2: hardest section card -->
       <section v-if="published.profile.length > 1" class="block">
         <h2 class="eyebrow">{{ t('route.elevationProfile') }}</h2>
         <RouteBand :profile="published.profile" :length-km="published.length_km" :lang="lang" />
       </section>
-      <!-- V2: ShareBar blocks, services list, longest gap -->
+      <section v-for="bar in shareBars" :key="bar.kind" class="block">
+        <h2 class="eyebrow">{{ t(`route.sharesTitle.${bar.kind}`) }}</h2>
+        <ShareBar :shares="bar.shares" :kind="bar.kind" :lang="lang" />
+      </section>
+      <!-- V2: services list, longest gap -->
       <section v-if="published.sections.length" class="block description">
         <template v-for="(section, i) in published.sections" :key="i">
           <component
@@ -143,7 +163,10 @@ const coverImage = computed(() =>
           />
         </template>
       </section>
-      <!-- V2 (mobile): primary "ride" pill and outline GPX pill -->
+      <!-- V2 (mobile): primary "ride" pill; the GPX pill is filled until then -->
+      <div v-if="mobile" class="mobile-actions">
+        <GpxButton :href="gpxHref" :bytes="published.gpx_bytes" :lang="lang" />
+      </div>
     </article>
   </div>
 </template>
@@ -223,28 +246,6 @@ const coverImage = computed(() =>
   text-transform: uppercase;
   color: var(--color-ink-muted);
 }
-.tiles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--gap-9);
-}
-.tile {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-4);
-  padding: 11px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  background: var(--color-white);
-}
-.tile-label {
-  font: var(--text-caption);
-  color: var(--color-ink-muted);
-}
-.tile-value {
-  font: var(--text-key-figure);
-  color: var(--color-ink);
-}
 .description {
   font: var(--text-body);
   color: var(--color-ink-prose);
@@ -293,11 +294,10 @@ const coverImage = computed(() =>
   .title {
     font: 700 21px/1.2 var(--font-family);
   }
-  .tile {
-    padding: 9px 11px;
-  }
-  .tile-value {
-    font: 700 19px/1.2 var(--font-family);
+  .mobile-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--gap-8);
   }
 }
 </style>

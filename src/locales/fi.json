@@ -20,14 +20,18 @@
   "route": {
     "length": "{km} km",
     "ascent": "{m} m",
-    "lengthLabel": "Pituus",
-    "ascentLabel": "Nousu",
     "difficulty": "Vaativuus",
     "open": "Avaa reitti",
     "none": "Tässä teemassa ei ole vielä reittejä.",
     "shown": "{shown} / {total} reittiä",
     "keyFigures": "Avainluvut",
-    "elevationProfile": "Korkeusprofiili"
+    "elevationProfile": "Korkeusprofiili",
+    "downloadGpx": "Lataa GPX",
+    "sharesTitle": {
+      "surface": "Pinta",
+      "traffic": "Liikenne",
+      "itrs": "Tekninen vaikeus osuuksina"
+    }
   },
   "season": {
     "summer": "Kesä",
@@ -101,6 +105,63 @@
     "readMore": "Lue lisää ↓"
   },
   "maintenance": {
-    "notice": "Ei kunnan ylläpitämä"
+    "notice": "Ei kunnan ylläpitämä",
+    "title": "Ei kunnan ylläpitämä reitti",
+    "intro": "Reitti ei ole kunnan reittirekisterissä. Kukaan ei auraa, merkitse tai tarkasta sitä sivuston vuoksi:",
+    "reason": {
+      "private_road_no_permission": "Kulkee yksityistiellä, jolle ei ole pyydetty lupaa.",
+      "unmarked": "Reittiä ei ole merkitty maastoon.",
+      "unmaintained": "Reittiä ei huolleta eikä tarkasteta.",
+      "everymans_rights_terrain": "Kulkee maastossa jokamiehenoikeudella.",
+      "seasonal": "Kuljettavissa vain osan vuotta."
+    }
+  },
+  "itrs": {
+    "level": {
+      "green": "vihreä",
+      "blue": "sininen",
+      "red": "punainen",
+      "black": "musta",
+      "orange": "oranssi"
+    },
+    "notRated": "Ei luokiteltu",
+    "exposure": "Altistus",
+    "wilderness": "Erämaisuus",
+    "assessedBy": "Arvioija {name}"
+  },
+  "keyFigure": {
+    "length": "Pituus",
+    "ascent": "Nousu",
+    "difficulty": "Vaativuus",
+    "itrs_technical": "Tekninen vaikeus (ITRS)",
+    "itrs_endurance": "Kestävyys (ITRS)",
+    "itrs_exposure": "Altistus (ITRS)",
+    "itrs_wilderness": "Erämaisuus (ITRS)",
+    "dominant_surface": "Pääasiallinen pinta",
+    "surface_shares": "Pinta",
+    "separated_share": "Erotettua väylää",
+    "winter_maintenance": "Talvikunnossapito",
+    "longest_service_gap": "Pisin väli ilman palveluja"
+  },
+  "surface": {
+    "asphalt": "asfaltti",
+    "paving": "kiveys",
+    "gravel": "sora",
+    "trail": "polku",
+    "boardwalk": "pitkospuut",
+    "snow": "lumi",
+    "unknown": "tuntematon",
+    "mixed": "sekalainen"
+  },
+  "traffic": {
+    "separated": "erotettu väylä",
+    "quiet": "hiljainen tie",
+    "busy": "vilkas tie",
+    "unknown": "tuntematon"
+  },
+  "winterMaintenance": {
+    "plowed": "aurattu",
+    "groomed": "pohjattu",
+    "none": "ei kunnossapitoa"
   }
 }

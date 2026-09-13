@@ -16,7 +16,6 @@ const highlighted = defineModel<string | null>('highlightedRoute', { default: nu
 const { t } = useI18n()
 
 const defaultLang = computed(() => props.catalog.project.default_language)
-const themeId = computed(() => props.theme?.id ?? 'all')
 const themeName = computed(() =>
   props.theme ? langText(props.theme.name, props.lang, defaultLang.value) : t('theme.all'),
 )
@@ -51,7 +50,7 @@ watch(highlighted, (id) => {
       <li v-for="r in routes" :id="`route-${r.id}`" :key="r.id">
         <RouteListCard
           :route="r"
-          :theme-id="themeId"
+          :theme="theme"
           :lang="lang"
           :default-lang="defaultLang"
           :selected="r.id === highlighted"

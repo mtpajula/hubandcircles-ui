@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
+import { ALL_THEMES } from '../data/identifiers'
 import { dataPath } from '../data/paths'
-import { formatKm, formatM } from '../i18n/format'
+import { presentationOf } from '../data/presentation'
 import { langText } from '../i18n/language'
-import type { RouteSummary } from '../types/catalog'
+import type { RouteSummary, Theme } from '../types/catalog'
+import KeyFigures from './KeyFigures.vue'
+import MaintenanceNotice from './MaintenanceNotice.vue'
 
 /**
  * One route in the sidebar list (UI-SPEC 3.3). The whole card is a link to the route card;
@@ -11,7 +14,8 @@ import type { RouteSummary } from '../types/catalog'
  */
 const props = defineProps<{
   route: RouteSummary
-  themeId: string
+  /** Current theme; `null` is `all` and shows the default key figures (18.2.12). */
+  theme: Theme | null
   lang: string
   defaultLang: string
   /** Highlighted on the map (hover, focus or line click). */
@@ -20,7 +24,8 @@ const props = defineProps<{
   open: boolean
 }>()
 const emit = defineEmits<{ highlight: [id: string | null] }>()
-const { t } = useI18n()
+const themeId = computed(() => props.theme?.id ?? ALL_THEMES)
+const figures = computed(() => presentationOf(props.theme).key_figures)
 
 function highlight(): void {
   emit('highlight', props.route.id)
@@ -54,21 +59,9 @@ function clear(): void {
     <span class="column">
       <span class="title">
         {{ langText(route.name, lang, defaultLang) }}
-        <!-- V2: MaintenanceNotice pill -->
+        <MaintenanceNotice :route="route" variant="pill" />
       </span>
-      <span class="figures">
-        <span class="figure">
-          <span class="label">{{ t('route.lengthLabel') }}</span>
-          <span class="value">{{
-            t('route.length', { km: formatKm(lang, route.length_km) })
-          }}</span>
-        </span>
-        <span v-if="route.ascent_m != null" class="figure">
-          <span class="label">{{ t('route.ascentLabel') }}</span>
-          <span class="value">{{ t('route.ascent', { m: formatM(lang, route.ascent_m) }) }}</span>
-        </span>
-      </span>
-      <!-- V2: third key figure (e.g. ShareBar) -->
+      <KeyFigures :figures="figures" :route="route" :lang="lang" :limit="3" compact />
     </span>
   </RouterLink>
 </template>
@@ -108,25 +101,11 @@ function clear(): void {
   flex: 1;
 }
 .title {
-  font: var(--text-card-title);
-  color: var(--color-ink);
-}
-.figures {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--gap-8);
-}
-.figure {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.label {
-  font: var(--text-caption);
-  color: var(--color-ink-muted);
-}
-.value {
-  font: 700 14px/1.2 var(--font-family);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-6) var(--gap-8);
+  font: var(--text-card-title);
   color: var(--color-ink);
 }
 </style>

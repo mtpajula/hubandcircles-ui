@@ -20,14 +20,18 @@
   "route": {
     "length": "{km} km",
     "ascent": "{m} m",
-    "lengthLabel": "Length",
-    "ascentLabel": "Ascent",
     "difficulty": "Difficulty",
     "open": "Open route",
     "none": "No routes in this theme yet.",
     "shown": "{shown} / {total} routes",
     "keyFigures": "Key figures",
-    "elevationProfile": "Elevation profile"
+    "elevationProfile": "Elevation profile",
+    "downloadGpx": "Download GPX",
+    "sharesTitle": {
+      "surface": "Surface",
+      "traffic": "Traffic",
+      "itrs": "Technical difficulty by section"
+    }
   },
   "season": {
     "summer": "Summer",
@@ -101,6 +105,63 @@
     "readMore": "Read more ↓"
   },
   "maintenance": {
-    "notice": "Not municipally maintained"
+    "notice": "Not municipally maintained",
+    "title": "Not a municipally maintained route",
+    "intro": "The route is not in the municipal route register. Nobody plows, marks or inspects it for this site:",
+    "reason": {
+      "private_road_no_permission": "Uses a private road without the owner’s permission.",
+      "unmarked": "The route is not marked on the ground.",
+      "unmaintained": "The route is not maintained or inspected.",
+      "everymans_rights_terrain": "Crosses terrain under everyman’s rights.",
+      "seasonal": "Passable only part of the year."
+    }
+  },
+  "itrs": {
+    "level": {
+      "green": "green",
+      "blue": "blue",
+      "red": "red",
+      "black": "black",
+      "orange": "orange"
+    },
+    "notRated": "Not rated",
+    "exposure": "Exposure",
+    "wilderness": "Wilderness",
+    "assessedBy": "Assessed by {name}"
+  },
+  "keyFigure": {
+    "length": "Length",
+    "ascent": "Ascent",
+    "difficulty": "Difficulty",
+    "itrs_technical": "Technical difficulty (ITRS)",
+    "itrs_endurance": "Endurance (ITRS)",
+    "itrs_exposure": "Exposure (ITRS)",
+    "itrs_wilderness": "Wilderness (ITRS)",
+    "dominant_surface": "Main surface",
+    "surface_shares": "Surface",
+    "separated_share": "Separated from traffic",
+    "winter_maintenance": "Winter maintenance",
+    "longest_service_gap": "Longest stretch without services"
+  },
+  "surface": {
+    "asphalt": "asphalt",
+    "paving": "paving",
+    "gravel": "gravel",
+    "trail": "trail",
+    "boardwalk": "boardwalk",
+    "snow": "snow",
+    "unknown": "unknown",
+    "mixed": "mixed"
+  },
+  "traffic": {
+    "separated": "separated path",
+    "quiet": "quiet road",
+    "busy": "busy road",
+    "unknown": "unknown"
+  },
+  "winterMaintenance": {
+    "plowed": "plowed",
+    "groomed": "groomed",
+    "none": "no maintenance"
   }
 }

@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import HubLogo from '../components/HubLogo.vue'
 import LanguageSwitch from '../components/LanguageSwitch.vue'
+import MaintenanceNotice from '../components/MaintenanceNotice.vue'
 import { useCatalog } from '../composables/useCatalog'
 import { ALL_THEMES } from '../data/identifiers'
 import { countRoutesByTheme } from '../data/routes'
@@ -18,6 +19,8 @@ import type { Catalog } from '../types/catalog'
  * has no language in its URL, so the choice is resolved here and travels as `?lang=`.
  */
 const props = defineProps<{ catalog: Catalog }>()
+/** Stub route for the sample notice in the about section (UI-SPEC 2.1). */
+const NOTICE_SAMPLE = { maintainer: 'non_municipal' } as const
 const { t } = useI18n()
 const route = useRoute()
 const { themesInOrder } = useCatalog()
@@ -167,10 +170,7 @@ function scrollToAbout(): void {
         <p>{{ t('landing.aboutText1') }}</p>
         <p>{{ t('landing.aboutText2') }}</p>
         <p class="notice-sample">
-          <span class="notice"
-            ><span class="notice-icon" aria-hidden="true">i</span>
-            {{ t('maintenance.notice') }}</span
-          >
+          <MaintenanceNotice :route="NOTICE_SAMPLE" variant="pill" />
           <span class="notice-caption">{{ t('landing.noticeSample') }}</span>
         </p>
       </div>
@@ -447,30 +447,6 @@ function scrollToAbout(): void {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--gap-10);
-}
-.notice {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--gap-6);
-  padding: 5px 10px;
-  border: 1px solid var(--color-notice-border);
-  border-radius: var(--radius-chip);
-  background: var(--color-notice-bg);
-  color: var(--color-notice-text);
-  font: var(--text-button);
-}
-/* UI-SPEC 1.1 / 6: 12–14 px "i" ring in the gravel icon color. */
-.notice-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 13px;
-  height: 13px;
-  border: 1.5px solid var(--color-notice-icon);
-  border-radius: 50%;
-  font: 700 9px/1 var(--font-family);
-  color: var(--color-notice-icon);
-  vertical-align: middle;
 }
 .notice-caption {
   font: var(--text-caption-lg);
