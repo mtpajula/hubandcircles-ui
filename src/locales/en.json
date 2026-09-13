@@ -163,5 +163,48 @@
     "plowed": "plowed",
     "groomed": "groomed",
     "none": "no maintenance"
+  },
+  "filter": {
+    "noData": "no data",
+    "atMost": "at most",
+    "atLeast": "at least",
+    "excluded": "The filters left out {n} route. | The filters left out {n} routes.",
+    "length": {
+      "under20": "under 20 km",
+      "20to40": "20–40 km",
+      "over40": "over 40 km"
+    },
+    "ascent": {
+      "under200": "under 200 m",
+      "200to500": "200–500 m",
+      "over500": "over 500 m"
+    }
+  },
+  "band": {
+    "title": "Band",
+    "cursor": "Band cursor",
+    "lane": {
+      "elevation": "elevation",
+      "surface": "surface",
+      "traffic": "traffic",
+      "itrs_technical": "technical difficulty"
+    }
+  },
+  "hardest": {
+    "title": "Hardest section",
+    "km": "km {km}",
+    "hint": "Tap: the map centres on the spot",
+    "marker": "km {km} · hardest section"
+  },
+  "gallery": {
+    "title": "Photos",
+    "open": "Open photo {n}",
+    "close": "Close",
+    "credit": "© {author} · {license}"
+  },
+  "video": {
+    "title": "Video",
+    "player": "Video player",
+    "link": "Open video"
   }
 }

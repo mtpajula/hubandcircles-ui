@@ -41,6 +41,7 @@ export type MaintenanceUrl = string | null
 export type Author = string
 export type License = string
 export type Location = [number, number] | null
+export type TakenAt = string | null
 export type NearbyServices = string[]
 export type NonMunicipalReasons = (
   | 'private_road_no_permission'
@@ -75,6 +76,11 @@ export type TrafficShares = {
 } | null
 export type WinterMaintenance = ('plowed' | 'groomed' | 'none') | null
 
+/**
+ * route.json (5.3). Media rule: `cover_image` is a ready path relative to the data root
+ * (`routes/<id>/media/cover-<hash>-400.webp`); everything else (`hardest_section.media`, gallery
+ * `media` entries) is a source key into `media`, where the sizes and the location are.
+ */
 export interface PublishedRoute {
   ascent_m?: AscentM
   bbox: Bbox
@@ -126,11 +132,15 @@ export interface Itrs {
 export interface Media1 {
   [k: string]: PublishedMedia
 }
+/**
+ * An image of the route (5.3): the WebP sizes and what the EXIF said, keyed by source path.
+ */
 export interface PublishedMedia {
   author: Author
   license: License
   location?: Location
   sizes?: Sizes
+  taken_at?: TakenAt
 }
 export interface Sizes {
   [k: string]: string

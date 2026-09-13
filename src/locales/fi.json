@@ -163,5 +163,48 @@
     "plowed": "aurattu",
     "groomed": "pohjattu",
     "none": "ei kunnossapitoa"
+  },
+  "filter": {
+    "noData": "ei tietoa",
+    "atMost": "enintään",
+    "atLeast": "vähintään",
+    "excluded": "Rajaus jätti {n} reitin pois. | Rajaus jätti {n} reittiä pois.",
+    "length": {
+      "under20": "alle 20 km",
+      "20to40": "20–40 km",
+      "over40": "yli 40 km"
+    },
+    "ascent": {
+      "under200": "alle 200 m",
+      "200to500": "200–500 m",
+      "over500": "yli 500 m"
+    }
+  },
+  "band": {
+    "title": "Nauha",
+    "cursor": "Nauhan osoitin",
+    "lane": {
+      "elevation": "korkeus",
+      "surface": "pinta",
+      "traffic": "liikenne",
+      "itrs_technical": "tekninen vaikeus"
+    }
+  },
+  "hardest": {
+    "title": "Reitin vaativin kohta",
+    "km": "km {km}",
+    "hint": "Napauta: kartta keskittyy kohtaan",
+    "marker": "km {km} · vaativin kohta"
+  },
+  "gallery": {
+    "title": "Kuvat",
+    "open": "Avaa kuva {n}",
+    "close": "Sulje",
+    "credit": "© {author} · {license}"
+  },
+  "video": {
+    "title": "Video",
+    "player": "Videosoitin",
+    "link": "Avaa video"
   }
 }

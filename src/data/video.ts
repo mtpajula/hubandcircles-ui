@@ -33,3 +33,35 @@ export function browserVideoConditions(): VideoConditions {
     effectiveType: connection?.effectiveType,
   }
 }
+
+/**
+ * Privacy-friendly embed address of a video section url (UI-SPEC 4.2 item 8): YouTube through
+ * `youtube-nocookie.com`, Vimeo through `player.vimeo.com`. Anything else is `null` and shown as
+ * a plain link. Pure string matching, no network.
+ */
+export function embedUrl(url: string): string | null {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    return null
+  }
+  const host = parsed.hostname.replace(/^www\.|^m\./, '')
+  const id = /^[\w-]+$/
+  if (host === 'youtu.be') {
+    const v = parsed.pathname.slice(1)
+    return id.test(v) ? `https://www.youtube-nocookie.com/embed/${v}` : null
+  }
+  if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    const v =
+      parsed.searchParams.get('v') ??
+      /^\/(?:shorts|embed)\/([\w-]+)/.exec(parsed.pathname)?.[1] ??
+      ''
+    return id.test(v) ? `https://www.youtube-nocookie.com/embed/${v}` : null
+  }
+  if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+    const v = /(\d+)\/?$/.exec(parsed.pathname)?.[1] ?? ''
+    return v ? `https://player.vimeo.com/video/${v}` : null
+  }
+  return null
+}

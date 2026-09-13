@@ -25,6 +25,9 @@ const route = useRoute()
 const { themesInOrder } = useCatalog()
 /** Route highlighted on the map: list hover/focus or a click on a line (UI-SPEC 3.3). */
 const highlighted = ref<string | null>(null)
+/** Band cursor and hardest-section km of the open route, shared by the card and the map. */
+const cursorKm = ref<number | null>(null)
+const hardestKm = ref<number | null>(null)
 
 const lang = computed(() => String(route.params.lang))
 const defaultLang = computed(() => props.catalog.project.default_language)
@@ -42,6 +45,10 @@ const projectSubtitle = computed(() =>
 
 watch(theme, (next) => applyTheme(next), { immediate: true })
 watch(themeId, () => (highlighted.value = null))
+watch(openRoute, () => {
+  cursorKm.value = null
+  hardestKm.value = null
+})
 </script>
 
 <template>
@@ -72,6 +79,8 @@ watch(themeId, () => (highlighted.value = null))
             <component
               :is="Component"
               v-model:highlighted-route="highlighted"
+              v-model:cursor-km="cursorKm"
+              v-model:hardest-km="hardestKm"
               :catalog="catalog"
               :theme="theme"
               :lang="lang"
@@ -82,6 +91,8 @@ watch(themeId, () => (highlighted.value = null))
       <main class="map" :aria-label="t('app.map')">
         <MapView
           v-model:highlighted-route="highlighted"
+          v-model:cursor-km="cursorKm"
+          v-model:hardest-km="hardestKm"
           :catalog="catalog"
           :theme="theme"
           :open-route="openRoute"

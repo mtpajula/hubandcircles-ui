@@ -17,6 +17,8 @@ import { BASEMAP_URL } from '../config'
 import { mixWithWhite } from '../data/color'
 import { loadOverview, routeEndpoints } from '../data/overview'
 import { dataPath } from '../data/paths'
+import { loadTrack, nearestKm, pointAtKm, type TrackFeature } from '../data/track'
+import { formatKm } from '../i18n/format'
 import { langText } from '../i18n/language'
 import { cssVar } from '../theme'
 import type { Catalog, Theme } from '../types/catalog'
@@ -39,6 +41,10 @@ const props = defineProps<{
 
 /** Highlighted route: set from the list (hover/focus) and from a click on a line. */
 const highlighted = defineModel<string | null>('highlightedRoute', { default: null })
+/** Band cursor of the open route (UI-SPEC 4.2 item 5): mirrored as a marker on the track. */
+const cursorKm = defineModel<number | null>('cursorKm', { default: null })
+/** Hardest-section km the card asked to show (UI-SPEC 4.3): marker and flyTo. */
+const hardestKm = defineModel<number | null>('hardestKm', { default: null })
 
 const { t } = useI18n()
 
@@ -49,6 +55,10 @@ const ROUTE_LAYERS = ['overview-casing', 'overview-line'] as const
 const container = ref<HTMLDivElement | null>(null)
 let map: MapLibreMap | null = null
 let ready: Promise<void> = Promise.resolve()
+/** track.geojson of the open route, for km <-> position lookups (src/data/track.ts). */
+let track: TrackFeature | null = null
+/** Bumped on every map move so that the marker positions below are recomputed. */
+const viewVersion = ref(0)
 
 const highlightedName = computed(() => {
   const r = props.catalog.routes.find((x) => x.id === highlighted.value)
@@ -198,6 +208,40 @@ function addRouteLayers(m: MapLibreMap) {
     m.on('mouseenter', id, () => (m.getCanvas().style.cursor = 'pointer'))
     m.on('mouseleave', id, () => (m.getCanvas().style.cursor = ''))
   }
+  // Hovering or tapping the open route's line moves the band cursor to the nearest track km.
+  const toCursor = (e: MapMouseEvent) => {
+    if (track) cursorKm.value = nearestKm(track, e.lngLat.lng, e.lngLat.lat)
+  }
+  m.on('mousemove', 'route-line', toCursor)
+  m.on('click', 'route-line', toCursor)
+  m.on('mouseenter', 'route-line', () => (m.getCanvas().style.cursor = 'crosshair'))
+  m.on('mouseleave', 'route-line', () => (m.getCanvas().style.cursor = ''))
+}
+
+// ---- markers (UI-SPEC 3.4, 4.3) ----------------------------------------------------------------
+// Plain positioned elements instead of maplibre's Marker: the same `project()` call, far less code.
+
+/** Track position of a km as pixel coordinates in the frame; `null` when there is nothing to show. */
+function markerPx(km: number | null): { x: number; y: number } | null {
+  void viewVersion.value
+  const m = map
+  const point = m && track && km !== null ? pointAtKm(track, km) : null
+  if (!m || !point) return null
+  const { x, y } = m.project(point)
+  return { x, y }
+}
+const cursorPx = computed(() => markerPx(cursorKm.value))
+const hardestPx = computed(() => markerPx(hardestKm.value))
+const hardestLabel = computed(() =>
+  hardestKm.value === null
+    ? ''
+    : t('hardest.marker', { km: formatKm(props.lang, hardestKm.value) }),
+)
+const translate = (p: { x: number; y: number }) => ({ transform: `translate(${p.x}px, ${p.y}px)` })
+
+function flyToHardest(m: MapLibreMap) {
+  const point = track && hardestKm.value !== null ? pointAtKm(track, hardestKm.value) : null
+  if (point) m.flyTo({ center: point, zoom: Math.max(m.getZoom(), 14), animate: animate() })
 }
 
 async function loadRoutes(m: MapLibreMap) {
@@ -218,16 +262,27 @@ function initialView(): Partial<MapOptions> {
     : { center: ROVANIEMI, zoom: 10 }
 }
 
-function updateOpenRoute(m: MapLibreMap, id: string | null) {
+async function updateOpenRoute(m: MapLibreMap, id: string | null) {
   const source = m.getSource('route') as GeoJSONSource | undefined
   if (!source) return
+  track = null
+  viewVersion.value++
   if (!id) {
     source.setData(EMPTY)
     return
   }
-  source.setData(dataPath(`routes/${id}/track.geojson`))
   const bbox = props.catalog.routes.find((r) => r.id === id)?.bbox
   if (bbox) m.fitBounds(bbox, { padding: 40, animate: animate() })
+  try {
+    const feature = await loadTrack(dataPath(`routes/${id}/track.geojson`))
+    if (id !== props.openRoute) return
+    track = feature
+    source.setData(feature)
+    viewVersion.value++
+    flyToHardest(m)
+  } catch (e) {
+    console.warn('track.geojson could not be loaded', e)
+  }
 }
 
 // ---- lifecycle ---------------------------------------------------------------------------------
@@ -246,12 +301,13 @@ onMounted(() => {
   })
   m.addControl(new NavigationControl({ showCompass: false }), 'top-right')
   m.addControl(new LayersControl(t('map.layers')), 'top-right')
+  m.on('move', () => viewVersion.value++)
   map = m
   // 'style.load' and not 'load': the latter waits for every basemap tile, which delays the routes.
   ready = new Promise((resolve) => m.once('style.load', () => resolve()))
   void ready.then(() => {
     addRouteLayers(m)
-    updateOpenRoute(m, props.openRoute)
+    void updateOpenRoute(m, props.openRoute)
     void loadRoutes(m)
   })
 })
@@ -271,15 +327,32 @@ watch(
   () => props.openRoute,
   (id) => {
     void ready.then(() => {
-      if (map) updateOpenRoute(map, id)
+      if (map) void updateOpenRoute(map, id)
     })
   },
 )
+
+watch(hardestKm, () => {
+  if (map) flyToHardest(map)
+})
 </script>
 
 <template>
   <div class="frame">
     <div ref="container" class="map"></div>
+    <div
+      v-if="cursorPx"
+      class="cursor-marker"
+      :style="translate(cursorPx)"
+      aria-hidden="true"
+    ></div>
+    <div v-if="hardestPx" class="hardest-marker" :style="translate(hardestPx)" aria-hidden="true">
+      <div class="hardest-column">
+        <span class="hardest-tooltip">{{ hardestLabel }}</span>
+        <span class="hardest-stem"></span>
+        <span class="hardest-dot"></span>
+      </div>
+    </div>
     <p v-if="highlightedName" class="badge" role="status">
       {{ t('map.selected', { name: highlightedName }) }}
     </p>
@@ -353,6 +426,60 @@ watch(
 }
 .frame :deep(.maplibregl-ctrl-attrib a) {
   color: var(--color-ink-soft);
+}
+/* Band cursor (12 px theme dot) and hardest-section marker (UI-SPEC 4.3), anchored at the dot centre. */
+.cursor-marker {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--theme-primary);
+  border: 2px solid var(--color-white);
+  box-shadow: var(--shadow-control);
+  pointer-events: none;
+}
+.hardest-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+/* The column hangs above the anchor so that the dot's centre (12 px from its bottom) sits on the km. */
+.hardest-column {
+  position: absolute;
+  bottom: -12px;
+  left: -80px;
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hardest-tooltip {
+  padding: 5px 8px;
+  border-radius: var(--radius-tooltip);
+  background: var(--color-ink);
+  color: var(--color-white);
+  font: 600 12px/1.2 var(--font-family);
+  white-space: nowrap;
+}
+.hardest-stem {
+  width: 2px;
+  height: 26px;
+  background: var(--color-ink);
+}
+.hardest-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--itrs-red);
+  border: 3px solid var(--color-white);
+  box-shadow: var(--shadow-control);
 }
 @media (max-width: 699px) {
   .legend {

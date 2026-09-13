@@ -197,7 +197,7 @@ on the right third of the frame; the left third is darkened.
     selected max are outlined (border `--color-border`, text muted).
   - `separated_share` ("vähintään"): 6 px slider track, fill `separated` color, value 700 13 "40 %".
   - `winter_maintenance`: chips `groomed` (filled theme), `plowed`, `none`.
-  - `difficulty`, `ascent`: chips analogous to length.
+  - `difficulty`: chips easy/moderate/demanding. `ascent`: chips "alle 200 m", "200–500 m", "yli 500 m".
 - If routes without the field exist, a "ei tietoa" chip is always present so unknowns never
   silently disappear.
 - Info box (white, border, radius 7, padding 8/10, 400 12/1.45): "Rajaus jätti N reittiä pois."

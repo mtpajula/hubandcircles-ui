@@ -52,5 +52,5 @@ router.beforeEach(async (to) => {
   const theme = known ? requested : c.project.default_theme
 
   if (lang === param(to.params.lang) && theme === requested) return true
-  return { name: to.name, params: { ...to.params, lang, theme }, replace: true }
+  return { name: to.name, params: { ...to.params, lang, theme }, query: to.query, replace: true }
 })
