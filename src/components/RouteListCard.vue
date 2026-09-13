@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { ALL_THEMES } from '../data/identifiers'
 import { dataPath } from '../data/paths'
+import { summaryImage } from '../data/media'
 import { presentationOf } from '../data/presentation'
 import { langText } from '../i18n/language'
 import type { RouteSummary, Theme } from '../types/catalog'
@@ -26,6 +27,7 @@ const props = defineProps<{
 const emit = defineEmits<{ highlight: [id: string | null] }>()
 const themeId = computed(() => props.theme?.id ?? ALL_THEMES)
 const figures = computed(() => presentationOf(props.theme).key_figures)
+const image = computed(() => summaryImage(props.route, presentationOf(props.theme).hero_image))
 
 function highlight(): void {
   emit('highlight', props.route.id)
@@ -47,9 +49,9 @@ function clear(): void {
     @focusout="clear"
   >
     <img
-      v-if="route.cover_image"
+      v-if="image"
       class="image"
-      :src="dataPath(route.cover_image)"
+      :src="dataPath(image)"
       alt=""
       loading="lazy"
       width="88"

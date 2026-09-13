@@ -16,6 +16,7 @@ export type Difficulty = ('easy' | 'moderate' | 'demanding') | null
 export type DominantSurface = string | null
 export type Gpx = string | null
 export type GpxBytes = number | null
+export type HardestImage = string | null
 export type Description = {
   [k: string]: string
 } | null
@@ -89,6 +90,7 @@ export interface PublishedRoute {
   dominant_surface?: DominantSurface
   gpx?: Gpx
   gpx_bytes?: GpxBytes
+  hardest_image?: HardestImage
   hardest_section?: HardestSection | null
   id: Id
   itrs?: Itrs | null

@@ -25,6 +25,7 @@ export type Bbox = [number, number, number, number]
 export type CoverImage = string | null
 export type Difficulty = ('easy' | 'moderate' | 'demanding') | null
 export type DominantSurface = string | null
+export type HardestImage = string | null
 export type Id = string
 export type AssessedBy = string | null
 export type AssessedOn = string | null
@@ -126,6 +127,7 @@ export interface RouteSummary {
   cover_image?: CoverImage
   difficulty?: Difficulty
   dominant_surface?: DominantSurface
+  hardest_image?: HardestImage
   id: Id
   itrs?: Itrs | null
   length_km: LengthKm

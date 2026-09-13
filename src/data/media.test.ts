@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PublishedRoute } from '../types/route'
-import { coverKey, heroImage, mediaPath } from './media'
+import { coverKey, heroImage, mediaPath, summaryImage } from './media'
 
 const route = {
   id: 'r',
@@ -41,5 +41,25 @@ describe('media paths', () => {
     expect(
       heroImage({ ...route, cover_image: null, hardest_section: null }, 'cover_image'),
     ).toBeNull()
+  })
+})
+
+describe('summaryImage', () => {
+  const base = {
+    id: 'r',
+    name: { fi: 'R' },
+    themes: ['mtb'],
+    seasons: [],
+    length_km: 1,
+    bbox: [0, 0, 1, 1],
+  } as never
+  it('prefers the hardest image when the theme asks for it and falls back to the cover', () => {
+    const route = { ...(base as object), cover_image: 'c.webp', hardest_image: 'h.webp' } as never
+    expect(summaryImage(route, 'hardest_section')).toBe('h.webp')
+    expect(summaryImage(route, 'cover_image')).toBe('c.webp')
+    expect(
+      summaryImage({ ...(base as object), cover_image: 'c.webp' } as never, 'hardest_section'),
+    ).toBe('c.webp')
+    expect(summaryImage(base, 'cover_image')).toBeNull()
   })
 })

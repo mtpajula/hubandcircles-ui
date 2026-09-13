@@ -1,4 +1,4 @@
-import type { HeroImage } from '../types/catalog'
+import type { HeroImage, RouteSummary } from '../types/catalog'
 import type { PublishedMedia, PublishedRoute } from '../types/route'
 
 export type MediaSize = '400' | '1600'
@@ -39,4 +39,16 @@ export function heroImage(
     if (small) return { small, large: mediaPath(route, key!, '1600') }
   }
   return route.cover_image ? { small: route.cover_image, large: null } : null
+}
+
+/**
+ * List-card image (UI-SPEC 3.3) from the catalog summary: the hardest section's picture when
+ * the theme asks for it and the build published one, otherwise the cover; null hides the image.
+ */
+export function summaryImage(route: RouteSummary, kind: HeroImage): string | null {
+  const candidates =
+    kind === 'hardest_section'
+      ? [route.hardest_image, route.cover_image]
+      : [route.cover_image, route.hardest_image]
+  return candidates.find((x): x is string => typeof x === 'string' && x.length > 0) ?? null
 }
