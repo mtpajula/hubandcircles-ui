@@ -10,7 +10,8 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.app.json && vue-tsc --noEmit -p tsconfig.node.json",
     "lint": "eslint . && prettier --check .",
     "test": "vitest run",
-    "types": "node scripts/generate-types.mjs"
+    "types": "node scripts/generate-types.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "maplibre-gl": "^6.9.0",
@@ -24,6 +25,7 @@
     "eslint": "^9.30.0",
     "eslint-plugin-vue": "^10.3.0",
     "json-schema-to-typescript": "^15.0.4",
+    "playwright-core": "^1.55.0",
     "prettier": "^3.6.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.40.0",

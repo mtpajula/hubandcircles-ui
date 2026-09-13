@@ -35,6 +35,22 @@ the landing page hero video and its poster. They are used by the landing page (R
 All code, identifiers, file names, comments and translation keys are English. Finnish appears
 only in `src/locales/fi.json` values. `src/test/language.test.ts` enforces this.
 
+## Browser smoke test
+
+`npm run smoke` drives Google Chrome (must be installed; `playwright-core` uses the `chrome`
+channel, no browser download) against a running preview, `SMOKE_URL` (default
+`http://127.0.0.1:8767`). It opens the landing page, a theme page, `all` and the first route of
+`data/catalog.json`, and fails on page or console errors, a missing map canvas, a MapLibre worker
+or track request that did not return 200, "undefined"/"NaN" in the visible text, or a route page
+without the GPX button.
+
+```
+npm run build
+(cd ../hubandcircles-manager && uv run python -m manager preview --data tests/fixtures/fx-full \
+  --dist /tmp/hc-full --frontend ../hubandcircles-ui/dist --port 8767) &
+npm run smoke
+```
+
 ## Done means
 
 ```
