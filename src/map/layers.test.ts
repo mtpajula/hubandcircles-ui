@@ -170,7 +170,8 @@ describe('stored state', () => {
       on: new Set(['shelters']),
       services: false,
     })
-    expect(readState(storage, 'layers:winter', [guide, shelters])?.base).toBeNull()
+    // A stored base that no longer exists invalidates the whole choice (theme default applies).
+    expect(readState(storage, 'layers:winter', [guide, shelters])).toBeNull()
   })
   it('defaults the services entry to on when the stored value is missing or not a boolean', () => {
     const storage = memory()
@@ -329,5 +330,20 @@ describe('osmZoomRange()', () => {
     expect(osmZoomRange({ base: 'b' }, [base])).toEqual([0, 12])
     expect(osmZoomRange({ base: null }, [base])).toEqual([0, 24])
     expect(osmZoomRange({ base: 'x' }, [base])).toEqual([0, 24])
+  })
+})
+
+describe('readState() with a removed base layer', () => {
+  it('discards the stored choice so the theme default applies', () => {
+    const store = new Map<string, string>()
+    const storage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+    }
+    storage.setItem('layers:winter', JSON.stringify({ base: 'toner', on: [], services: true }))
+    const base = { id: 'base-map', slot: 'base' } as never
+    expect(readState(storage, 'layers:winter', [base])).toBeNull()
+    storage.setItem('layers:winter', JSON.stringify({ base: null, on: [] }))
+    expect(readState(storage, 'layers:winter', [base])?.base).toBeNull()
   })
 })

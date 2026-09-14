@@ -117,8 +117,11 @@ export function readState(
     const { base, on, services } = parsed as { base?: unknown; on?: unknown; services?: unknown }
     const ids = new Set(available.map((l) => l.id))
     const bases = new Set(available.filter((l) => l.slot === 'base').map((l) => l.id))
+    // A remembered base layer that no longer exists (removed from the data) invalidates the
+    // whole choice: the theme default applies again instead of "no base map".
+    if (typeof base === 'string' && !bases.has(base)) return null
     return {
-      base: typeof base === 'string' && bases.has(base) ? base : null,
+      base: typeof base === 'string' ? base : null,
       on: new Set(Array.isArray(on) ? on.filter((x): x is string => ids.has(String(x))) : []),
       services: typeof services === 'boolean' ? services : true,
     }
