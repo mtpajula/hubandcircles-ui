@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n'
 import ServiceIcon from '../components/ServiceIcon.vue'
 import { presentationOf } from '../data/presentation'
 import { langText } from '../i18n/language'
-import type { PublishedLayer, Theme } from '../types/catalog'
+import type { Catalog, PublishedLayer, Theme } from '../types/catalog'
+import { coverageOn } from './layers'
 
 /**
  * "On the map" legend box (UI-SPEC 3.4): selected route, other routes, topo coverage boundary,
@@ -14,8 +15,10 @@ import type { PublishedLayer, Theme } from '../types/catalog'
  */
 const props = defineProps<{
   theme: Theme | null
-  /** Visible raster layers; only those with `legend` entries are listed. */
+  /** Layers that are on: raster ones with `legend` entries are listed, coverage gates its row. */
   layers?: PublishedLayer[]
+  /** `catalog.coverage` (5.6); the coverage row shows only while one of its layers is on (P11). */
+  coverage?: Catalog['coverage']
   lang?: string
   defaultLang?: string
 }>()
@@ -32,6 +35,8 @@ const rasterLegends = computed(() =>
       entries: (l.legend ?? []).map((e, i) => ({ key: i, color: e.color, label: text(e.label) })),
     })),
 )
+
+const showCoverage = computed(() => coverageOn(props.coverage, props.layers ?? []))
 
 const categories = computed(() =>
   presentationOf(props.theme).service_categories_first.map((id, i) => {
@@ -52,7 +57,7 @@ const categories = computed(() =>
       <li class="row">
         <span class="swatch other" aria-hidden="true"></span>{{ t('map.legendOthers') }}
       </li>
-      <li class="row">
+      <li v-if="showCoverage" class="row">
         <span class="swatch coverage" aria-hidden="true"></span>{{ t('map.legendCoverage') }}
       </li>
       <li class="divider" role="separator"></li>

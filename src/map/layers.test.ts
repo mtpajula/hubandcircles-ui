@@ -3,6 +3,8 @@ import type { PublishedLayer, Theme } from '../types/catalog'
 import {
   available,
   availableLayers,
+  coverageOn,
+  coverageSpecs,
   initialState,
   isOn,
   layerSpecs,
@@ -197,6 +199,9 @@ describe('layerSpecs()', () => {
     ])
     const xyz = layerSpecs(toner, '#000')!
     expect(xyz.source).toMatchObject({ tiles: [toner.url], minzoom: 0, maxzoom: 18 })
+    // Tool-tiled xyz layers carry a data-relative url (5.6).
+    const topo = layerSpecs({ ...toner, url: 'layers/topo/v1/{z}/{x}/{y}.png' }, '#000')!
+    expect(topo.source).toMatchObject({ tiles: ['./data/layers/topo/v1/{z}/{x}/{y}.png'] })
   })
   it('makes a geojson source and a white circle with the style or fallback stroke for points', () => {
     const specs = layerSpecs(shelters, '#2f6f7e')!
@@ -253,5 +258,42 @@ describe('parseNestedProperties()', () => {
     expect(
       parseNestedProperties({ id: 'a', name: '{"fi":"Laavu"}', category: 'lean_to', url: '{x' }),
     ).toEqual({ id: 'a', name: { fi: 'Laavu' }, category: 'lean_to', url: '{x' })
+  })
+})
+
+describe('coverageSpecs()', () => {
+  it('makes a dashed ink line per coverage entry whose layer is in the catalog, no fill', () => {
+    const catalog = {
+      layers: [toner, aerial],
+      coverage: { toner: 'layers/toner-coverage.geojson', gone: 'layers/gone-coverage.geojson' },
+    }
+    const specs = coverageSpecs(catalog, '#101820')
+    expect(specs).toHaveLength(1)
+    expect(specs[0]!.layerId).toBe('toner')
+    expect(specs[0]!.source).toEqual({
+      type: 'geojson',
+      data: './data/layers/toner-coverage.geojson',
+    })
+    expect(specs[0]!.layers).toEqual([
+      {
+        id: 'coverage-toner',
+        type: 'line',
+        source: 'coverage-toner',
+        layout: { 'line-join': 'round' },
+        paint: {
+          'line-color': '#101820',
+          'line-width': 1.5,
+          'line-opacity': 0.35,
+          'line-dasharray': [7 / 1.5, 7 / 1.5],
+        },
+      },
+    ])
+    expect(coverageSpecs({ layers: [toner] }, '#000')).toEqual([])
+  })
+  it('coverageOn() is true only while a covered layer is on', () => {
+    const coverage = { toner: 'layers/toner-coverage.geojson' }
+    expect(coverageOn(coverage, [toner, aerial])).toBe(true)
+    expect(coverageOn(coverage, [aerial])).toBe(false)
+    expect(coverageOn(undefined, [toner])).toBe(false)
   })
 })

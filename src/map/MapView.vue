@@ -46,6 +46,7 @@ import './worker'
 import { unionBboxes } from './bbox'
 import {
   availableLayers,
+  coverageSpecs,
   initialState,
   isOn,
   layerSpecs,
@@ -404,6 +405,20 @@ function addCatalogLayers(m: MapLibreMap) {
       console.warn(`layer ${layer.id} could not be added`, e)
     }
   }
+  // Coverage boundaries (5.6) share their layer's visibility: their ids join its entry.
+  for (const specs of coverageSpecs(props.catalog, cssVar('--color-ink'))) {
+    try {
+      m.addSource(specs.sourceId, specs.source)
+      for (const spec of specs.layers)
+        m.addLayer({ ...spec, layout: { ...spec.layout, visibility: 'none' } }, slotAnchor('area'))
+      mapLayerIds.set(specs.layerId, [
+        ...(mapLayerIds.get(specs.layerId) ?? []),
+        ...specs.layers.map((l) => l.id),
+      ])
+    } catch (e) {
+      console.warn(`coverage of ${specs.layerId} could not be added`, e)
+    }
+  }
 }
 
 /** A click on a catalog points feature opens PoiPopup; the properties are Service-shaped (5.5). */
@@ -718,6 +733,7 @@ watch(visibleLayers, () => {
       class="legend"
       :theme="theme"
       :layers="visibleLayers"
+      :coverage="catalog.coverage"
       :lang="lang"
       :default-lang="catalog.project.default_language"
     />

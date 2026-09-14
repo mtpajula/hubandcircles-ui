@@ -1,6 +1,6 @@
 import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
 import { dataPath } from '../data/paths'
-import type { PublishedLayer, Theme } from '../types/catalog'
+import type { Catalog, PublishedLayer, Theme } from '../types/catalog'
 
 /**
  * Catalog layers (ARKKITEHTUURI.md 5.4, chapter 8): the visibility rules written once, the
@@ -140,6 +140,11 @@ export function wmsTileUrl(layer: Pick<PublishedLayer, 'url' | 'wms'>): string {
   return `${layer.url}${layer.url.includes('?') ? '&' : '?'}${query}`
 }
 
+/** Tool-tiled xyz layers have a data-relative `url` (5.6); external ones (`https://...`) do not. */
+function tileUrl(url: string): string {
+  return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : dataPath(url)
+}
+
 function zoomRange(layer: PublishedLayer): { minzoom?: number; maxzoom?: number } {
   const out: { minzoom?: number; maxzoom?: number } = {}
   if (layer.minzoom != null) out.minzoom = layer.minzoom
@@ -166,7 +171,7 @@ export function layerSpecs(layer: PublishedLayer, fallbackColor: string): LayerS
     case 'xyz': {
       const source: SourceSpecification = {
         type: 'raster',
-        tiles: [layer.type === 'wms' ? wmsTileUrl(layer) : layer.url],
+        tiles: [layer.type === 'wms' ? wmsTileUrl(layer) : tileUrl(layer.url)],
         tileSize: 256,
         ...zoomRange(layer),
       }
@@ -232,6 +237,59 @@ export function layerSpecs(layer: PublishedLayer, fallbackColor: string): LayerS
       console.warn(`layer ${layer.id}: type ${layer.type} is not supported yet`)
       return null
   }
+}
+
+/** A `catalog.coverage` entry and the line layer that draws it (chapter 8, 5.6). */
+export type CoverageSpecs = LayerSpecs & { layerId: string }
+
+export function coverageSourceId(layerId: string): string {
+  return `coverage-${layerId}`
+}
+
+/**
+ * Coverage boundaries of `catalog.coverage` for layers that exist in the catalog: one geojson
+ * source and one dashed `line` layer each, styled per UI-SPEC 3.4 (1.5 px `ink`, opacity .35,
+ * dash 7 7 in pixels). No fill. The caller shows the line only while its layer is on.
+ */
+export function coverageSpecs(
+  catalog: Pick<Catalog, 'coverage' | 'layers'>,
+  ink: string,
+): CoverageSpecs[] {
+  const ids = new Set((catalog.layers ?? []).map((l) => l.id))
+  const width = 1.5
+  return Object.entries(catalog.coverage ?? {})
+    .filter(([layerId]) => ids.has(layerId))
+    .map(([layerId, url]) => {
+      const id = coverageSourceId(layerId)
+      return {
+        layerId,
+        sourceId: id,
+        source: { type: 'geojson', data: dataPath(url) },
+        layers: [
+          {
+            id,
+            type: 'line',
+            source: id,
+            layout: { 'line-join': 'round' },
+            paint: {
+              'line-color': ink,
+              'line-width': width,
+              'line-opacity': 0.35,
+              // MapLibre dash lengths are in line widths; 7 px each at 1.5 px.
+              'line-dasharray': [7 / width, 7 / width],
+            },
+          },
+        ],
+      }
+    })
+}
+
+/** Whether any layer that is on has a coverage boundary (Legend row, UI-SPEC 3.4; P11). */
+export function coverageOn(
+  coverage: Catalog['coverage'],
+  visible: readonly Pick<PublishedLayer, 'id'>[],
+): boolean {
+  return visible.some((l) => l.id in (coverage ?? {}))
 }
 
 /**

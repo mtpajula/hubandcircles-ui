@@ -87,4 +87,17 @@ describe('Legend with raster layers', () => {
     expect(html).toContain('background:#0570b0')
     expect(text(html)).not.toContain('Opaskartta')
   })
+  it('shows the coverage row only while a layer with a coverage boundary is on (P11)', async () => {
+    const coverage = { 'guide-map': 'layers/guide-map-coverage.geojson' }
+    const props = { theme: null, lang: 'fi', defaultLang: 'fi', coverage }
+    expect(text(await render(Legend, { ...props, layers: [guide] }))).toContain(
+      'Maastokartan kattavuus',
+    )
+    expect(text(await render(Legend, { ...props, layers: [bilberry] }))).not.toContain(
+      'Maastokartan kattavuus',
+    )
+    expect(
+      text(await render(Legend, { ...props, coverage: undefined, layers: [guide] })),
+    ).not.toContain('Maastokartan kattavuus')
+  })
 })
