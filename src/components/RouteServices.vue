@@ -10,7 +10,8 @@ import ServiceIcon from './ServiceIcon.vue'
 /**
  * Services block of the route card (UI-SPEC 4.2 item 7): caption from the theme's priority
  * categories, one row per nearby service in the order of `nearbyOrdered`, and the theme's longest
- * gap without services below. A row click moves the band cursor (and the map marker) to the km.
+ * gap without services below. A row click moves the band cursor (and the map marker) to the km
+ * and asks the map to fly to the service (`focus` with the service id, UI-SPEC 3.4).
  */
 const props = defineProps<{
   entries: readonly NearbyEntry[]
@@ -20,6 +21,7 @@ const props = defineProps<{
   defaultLang: string
 }>()
 const cursorKm = defineModel<number | null>('cursorKm', { default: null })
+const emit = defineEmits<{ focus: [id: string] }>()
 const { t, te } = useI18n()
 
 function category(id: string): string {
@@ -45,6 +47,10 @@ const rows = computed(() =>
   })),
 )
 const km = (value: number) => formatKm(props.lang, value)
+function show(row: { id: string; km: number }) {
+  cursorKm.value = row.km
+  emit('focus', row.id)
+}
 </script>
 
 <template>
@@ -57,7 +63,7 @@ const km = (value: number) => formatKm(props.lang, value)
           type="button"
           class="row"
           :aria-label="t('service.marker', { name: row.name, km: km(row.km) })"
-          @click="cursorKm = row.km"
+          @click="show(row)"
         >
           <ServiceIcon :category="row.category" :size="22" />
           <span class="name">{{ row.name }}</span>

@@ -248,6 +248,7 @@
     "basemap": "Pohjakartta",
     "none": "Ei pohjakarttaa",
     "overlays": "Tasot",
+    "services": "Palvelut reitillä",
     "fetched": "haettu {date}"
   }
 }

@@ -51,6 +51,7 @@ import {
   isOn,
   layerSpecs,
   mergedAttribution,
+  osmVisible,
   parseNestedProperties,
   readState,
   storageKey,
@@ -79,6 +80,8 @@ const highlighted = defineModel<string | null>('highlightedRoute', { default: nu
 const cursorKm = defineModel<number | null>('cursorKm', { default: null })
 /** Hardest-section km the card asked to show (UI-SPEC 4.3): marker and flyTo. */
 const hardestKm = defineModel<number | null>('hardestKm', { default: null })
+/** Service id a card row asked to show (UI-SPEC 3.4): flyTo, then cleared for the next click. */
+const focusService = defineModel<string | null>('focusService', { default: null })
 
 const { t, te } = useI18n()
 
@@ -112,7 +115,7 @@ const selected = shallowRef<{ feature: ServiceFeature; km: number | null } | nul
 const catalogLayers = computed(() =>
   availableLayers(props.catalog.layers ?? [], props.theme?.id ?? null, props.openRoute),
 )
-const layerState = ref<LayerState>({ base: null, on: new Set() })
+const layerState = ref<LayerState>({ base: null, on: new Set(), services: true })
 const pickerOpen = ref(false)
 const picker = ref<ComponentPublicInstance | null>(null)
 let layersControl: LayersControl | null = null
@@ -249,19 +252,32 @@ function paint(m: MapLibreMap) {
   m.setPaintProperty('route-line', 'line-color', cssVar('--theme-highlight'))
   m.setPaintProperty('endpoints', 'circle-stroke-color', color)
   m.setPaintProperty('services', 'circle-stroke-color', cssVar('--theme-primary'))
-  // With a route open its nearby services are pills; the plain circles would only add noise.
-  m.setLayoutProperty('services', 'visibility', props.openRoute ? 'none' : 'visible')
+  m.setLayoutProperty('services', 'visibility', servicesVisibility())
   if (m.getLayer(DIM_LAYER))
     m.setLayoutProperty(DIM_LAYER, 'visibility', props.theme?.dark ? 'visible' : 'none')
 }
 
-/** Shows the catalog layers the picker has on; everything else in the catalog stays hidden. */
+/**
+ * The plain service circles show only with the picker's services entry on and no route open:
+ * an open route draws its nearby services as pills, and the circles would only add noise.
+ */
+function servicesVisibility(): 'visible' | 'none' {
+  return layerState.value.services && !props.openRoute ? 'visible' : 'none'
+}
+
+/**
+ * Shows the catalog layers the picker has on; everything else in the catalog stays hidden. The
+ * OSM basemap hides under a chosen `base` layer (UI-SPEC 3.4) and the service circles follow the
+ * picker's services entry.
+ */
 function applyLayers(m: MapLibreMap) {
   const visible = new Set(visibleLayers.value.map((l) => l.id))
   for (const [id, ids] of mapLayerIds)
     for (const layerId of ids)
       if (m.getLayer(layerId))
         m.setLayoutProperty(layerId, 'visibility', visible.has(id) ? 'visible' : 'none')
+  m.setLayoutProperty('basemap', 'visibility', osmVisible(layerState.value) ? 'visible' : 'none')
+  m.setLayoutProperty('services', 'visibility', servicesVisibility())
   layersControl?.setDisabled(catalogLayers.value.length === 0)
 }
 
@@ -496,7 +512,9 @@ function project(items: { feature: ServiceFeature; km: number | null }[]): Servi
   })
 }
 const pills = computed(() =>
-  project(nearbyFeatures.value.filter((x) => x.feature.properties.category !== 'issue')),
+  layerState.value.services
+    ? project(nearbyFeatures.value.filter((x) => x.feature.properties.category !== 'issue'))
+    : [],
 )
 const issues = computed(() => project(issueFeatures.value))
 const popupPx = computed(() => project(selected.value ? [selected.value] : [])[0] ?? null)
@@ -534,6 +552,15 @@ async function loadServicePoints(m: MapLibreMap) {
   } catch (e) {
     console.warn('services.geojson could not be loaded', e)
   }
+}
+
+/** Flies to the service a card row asked for (UI-SPEC 3.4); the request is one-shot. */
+function flyToService(m: MapLibreMap, id: string | null) {
+  const feature = id === null ? undefined : serviceIndex.value?.get(id)
+  if (!feature) return
+  const [lng, lat] = feature.geometry.coordinates
+  m.flyTo({ center: [lng!, lat!], zoom: 15, animate: animate() })
+  focusService.value = null
 }
 
 function flyToHardest(m: MapLibreMap) {
@@ -654,12 +681,16 @@ watch(hardestKm, () => {
   if (map) flyToHardest(map)
 })
 
+watch(focusService, (id) => {
+  if (map) flyToService(map, id)
+})
+
 watch(catalogLayers, () => {
   togglePicker(false)
   loadLayerState()
 })
 
-watch(visibleLayers, () => {
+watch(layerState, () => {
   void ready.then(() => {
     if (map) applyLayers(map)
   })

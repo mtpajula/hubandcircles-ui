@@ -10,6 +10,7 @@ import {
   layerSpecs,
   mergedAttribution,
   onInitially,
+  osmVisible,
   parseNestedProperties,
   readState,
   storageKey,
@@ -113,12 +114,12 @@ describe('onInitially() and initialState()', () => {
   it('prefers the theme basemap, else the first base layer on initially', () => {
     const t = theme({ id: 'winter', basemap: 'toner', default_layers: ['shelters'] })
     const state = initialState(availableLayers(layers, 'winter', null), t)
-    expect(state).toEqual({ base: 'toner', on: new Set(['shelters']) })
+    expect(state).toEqual({ base: 'toner', on: new Set(['shelters']), services: true })
     expect(initialState([guide, toner], theme({ basemap: 'missing' })).base).toBe('guide-map')
     expect(initialState([aerial], theme({})).base).toBeNull()
   })
   it('isOn reads base and overlays from the right field', () => {
-    const state = { base: 'toner', on: new Set(['aerial']) }
+    const state = { base: 'toner', on: new Set(['aerial']), services: true }
     expect(isOn(toner, state)).toBe(true)
     expect(isOn(guide, state)).toBe(false)
     expect(isOn(aerial, state)).toBe(true)
@@ -128,13 +129,22 @@ describe('onInitially() and initialState()', () => {
 
 describe('mergedAttribution()', () => {
   it('puts the basemap first and de-duplicates the visible layers', () => {
-    const state = { base: 'guide-map', on: new Set(['aerial', 'shelters']) }
+    const state = { base: 'guide-map', on: new Set(['aerial', 'shelters']), services: true }
     expect(mergedAttribution(layers, state, '© OpenStreetMap-tekijät')).toBe(
       '© OpenStreetMap-tekijät · © Rovaniemen kaupunki · © OpenStreetMap contributors',
     )
   })
   it('is just the basemap when nothing is on', () => {
-    expect(mergedAttribution(layers, { base: null, on: new Set() }, 'osm')).toBe('osm')
+    expect(mergedAttribution(layers, { base: null, on: new Set(), services: true }, 'osm')).toBe(
+      'osm',
+    )
+  })
+})
+
+describe('osmVisible()', () => {
+  it('hides the OSM basemap under a chosen base layer and shows it with none', () => {
+    expect(osmVisible({ base: 'toner' })).toBe(false)
+    expect(osmVisible({ base: null })).toBe(true)
   })
 })
 
@@ -148,13 +158,25 @@ describe('stored state', () => {
   }
   it('round-trips and drops ids that are no longer available', () => {
     const storage = memory()
-    writeState(storage, storageKey('winter'), { base: 'toner', on: new Set(['shelters', 'x']) })
+    writeState(storage, storageKey('winter'), {
+      base: 'toner',
+      on: new Set(['shelters', 'x']),
+      services: false,
+    })
     expect(storageKey(null)).toBe('layers:all')
     expect(readState(storage, 'layers:winter', [toner, shelters])).toEqual({
       base: 'toner',
       on: new Set(['shelters']),
+      services: false,
     })
     expect(readState(storage, 'layers:winter', [guide, shelters])?.base).toBeNull()
+  })
+  it('defaults the services entry to on when the stored value is missing or not a boolean', () => {
+    const storage = memory()
+    storage.setItem('k', JSON.stringify({ base: null, on: [] }))
+    expect(readState(storage, 'k', layers)?.services).toBe(true)
+    storage.setItem('k', JSON.stringify({ base: null, on: [], services: 'no' }))
+    expect(readState(storage, 'k', layers)?.services).toBe(true)
   })
   it('tolerates garbage, a missing store and throwing storage', () => {
     const storage = memory()
@@ -170,7 +192,9 @@ describe('stored state', () => {
       },
     }
     expect(readState(broken, 'k', layers)).toBeNull()
-    expect(() => writeState(broken, 'k', { base: null, on: new Set() })).not.toThrow()
+    expect(() =>
+      writeState(broken, 'k', { base: null, on: new Set(), services: true }),
+    ).not.toThrow()
   })
 })
 

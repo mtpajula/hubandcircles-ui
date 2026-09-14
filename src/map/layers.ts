@@ -8,8 +8,11 @@ import type { Catalog, PublishedLayer, Theme } from '../types/catalog'
  * Everything here is pure; MapView.vue wires the results into the map.
  */
 
-/** What the picker chose: one `base` layer (or none) and the ids of the other layers that are on. */
-export type LayerState = { base: string | null; on: Set<string> }
+/**
+ * What the picker chose: one `base` layer (or none), the ids of the other layers that are on,
+ * and the frontend-only "services on the route" entry (UI-SPEC 3.4; pills and service circles).
+ */
+export type LayerState = { base: string | null; on: Set<string>; services: boolean }
 
 /** `available()` of 5.4. `themeId` is `null` in the `all` view, where only `"*"` layers apply. */
 export function available(
@@ -49,7 +52,15 @@ export function initialState(
   const base =
     bases.find((l) => l.id === theme?.basemap) ?? bases.find((l) => onInitially(l, theme)) ?? null
   const on = available.filter((l) => l.slot !== 'base' && onInitially(l, theme)).map((l) => l.id)
-  return { base: base?.id ?? null, on: new Set(on) }
+  return { base: base?.id ?? null, on: new Set(on), services: true }
+}
+
+/**
+ * The hardcoded OSM basemap shows only while no `base` layer is chosen (UI-SPEC 3.4): base maps
+ * may be partly transparent, and nothing must bleed through them.
+ */
+export function osmVisible(state: Pick<LayerState, 'base'>): boolean {
+  return state.base === null
 }
 
 export function isOn(layer: PublishedLayer, state: LayerState): boolean {
@@ -89,12 +100,13 @@ export function readState(
     if (!raw) return null
     const parsed: unknown = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null) return null
-    const { base, on } = parsed as { base?: unknown; on?: unknown }
+    const { base, on, services } = parsed as { base?: unknown; on?: unknown; services?: unknown }
     const ids = new Set(available.map((l) => l.id))
     const bases = new Set(available.filter((l) => l.slot === 'base').map((l) => l.id))
     return {
       base: typeof base === 'string' && bases.has(base) ? base : null,
       on: new Set(Array.isArray(on) ? on.filter((x): x is string => ids.has(String(x))) : []),
+      services: typeof services === 'boolean' ? services : true,
     }
   } catch {
     return null
@@ -103,7 +115,8 @@ export function readState(
 
 export function writeState(storage: Storage | null, key: string, state: LayerState): void {
   try {
-    storage?.setItem(key, JSON.stringify({ base: state.base, on: [...state.on] }))
+    const { base, on, services } = state
+    storage?.setItem(key, JSON.stringify({ base, on: [...on], services }))
   } catch {
     // Private mode or a full quota: the choice simply is not remembered.
   }

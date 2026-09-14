@@ -34,6 +34,8 @@ const props = defineProps<{ catalog: Catalog; theme: Theme | null; lang: string 
 /** Band cursor and hardest-section km, mirrored on the map by MapPage. */
 const cursorKm = defineModel<number | null>('cursorKm', { default: null })
 const hardestKm = defineModel<number | null>('hardestKm', { default: null })
+/** Service id the services block asked the map to fly to (UI-SPEC 3.4). */
+const focusService = defineModel<string | null>('focusService', { default: null })
 /** `nearby_services` of the loaded route, handed to the map for its markers (UI-SPEC 3.4). */
 const nearbyServices = defineModel<NearbyService[]>('nearbyServices', { default: () => [] })
 const { t, te } = useI18n()
@@ -316,6 +318,7 @@ const blocks = computed(() =>
           v-else-if="block === 'services'"
           v-model:cursor-km="cursorKm"
           :entries="nearby"
+          @focus="focusService = $event"
           :categories-first="presentation.service_categories_first"
           :gap="serviceGap"
           :lang="lang"

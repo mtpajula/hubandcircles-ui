@@ -43,13 +43,13 @@ describe('LayerPicker', () => {
   it('lists base layers as radios with "no base map" and the others as checkboxes', async () => {
     const html = await render(LayerPicker, {
       layers: [guide, shelters],
-      state: { base: 'guide-map', on: new Set<string>() },
+      state: { base: 'guide-map', on: new Set<string>(), services: true },
       lang: 'fi',
       defaultLang: 'fi',
     })
     expect(text(html)).toBe(
-      'Pohjakartta Opaskartta © Rovaniemen kaupunki Ei pohjakarttaa Tasot Laavut ja tuvat ' +
-        '© OpenStreetMap contributors · haettu 13.9.2026',
+      'Pohjakartta Opaskartta © Rovaniemen kaupunki Ei pohjakarttaa Tasot Palvelut reitillä ' +
+        'Laavut ja tuvat © OpenStreetMap contributors · haettu 13.9.2026',
     )
     expect(html.match(/type="radio"/g)).toHaveLength(2)
     expect(html).toMatch(/type="radio"[^>]*value="guide-map"[^>]*checked/)
@@ -57,21 +57,38 @@ describe('LayerPicker', () => {
     expect(html).toContain('id="layer-picker"')
   })
 
+  it('starts the overlays list with the services entry, checked per state', async () => {
+    const props = { layers: [guide], lang: 'fi', defaultLang: 'fi' }
+    const on = await render(LayerPicker, {
+      ...props,
+      state: { base: null, on: new Set<string>(), services: true },
+    })
+    expect(text(on)).toContain('Tasot Palvelut reitillä')
+    expect(on.match(/type="checkbox"/g)).toHaveLength(1)
+    expect(on).toMatch(/type="checkbox"[^>]*value="services"[^>]*checked/)
+    const off = await render(LayerPicker, {
+      ...props,
+      state: { base: null, on: new Set<string>(), services: false },
+    })
+    expect(off).toMatch(/type="checkbox"[^>]*value="services"(?![^>]*checked)/)
+  })
+
   it('hides an empty section and reads names in the chosen language', async () => {
     const html = await render(
       LayerPicker,
       {
         layers: [shelters],
-        state: { base: null, on: new Set(['shelters']) },
+        state: { base: null, on: new Set(['shelters']), services: false },
         lang: 'en',
         defaultLang: 'fi',
       },
       'en',
     )
     expect(text(html)).toBe(
-      'Layers Shelters and huts © OpenStreetMap contributors · fetched 9/13/2026',
+      'Layers Services on the route Shelters and huts © OpenStreetMap contributors · ' +
+        'fetched 9/13/2026',
     )
-    expect(html).toMatch(/type="checkbox"[^>]*checked/)
+    expect(html).toMatch(/type="checkbox"[^>]*value="shelters"[^>]*checked/)
   })
 })
 

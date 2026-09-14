@@ -238,7 +238,14 @@ on the right third of the frame; the left third is darkened.
   `fetched_at`). Initial state per `on_initially()`; choices remembered per theme in
   `localStorage` (`layers:<theme>`). Empty catalog → tile disabled. Mobile: same popover, width
   calc(100vw − 28px).
+- While a `base`-slot layer is selected, the hardcoded OSM basemap is hidden (base maps may be
+  partly transparent; nothing must bleed through). "Ei pohjakarttaa" shows OSM again.
 - Base layer of a `dark` theme gets a dim overlay `rgba(12,20,28,.35)` above the `base` slot.
+- The picker's "Tasot" list starts with a frontend-only entry "Palvelut reitillä" (checkbox,
+  default on, remembered with the layer state as `services`) that toggles the nearby-service
+  pills of the open route and the all-services circle layer.
+- Clicking a row in the route card's services block flies the map to the service (zoom 15) and
+  sets the band cursor to its km.
 - Raster layers with `legend` entries show them in the legend box (swatch 11×11 + label) while on.
 - Legend box bottom-left (left 14, bottom 56, width 236, `#FFFFFFF2`, border, radius 9, padding
   11/13): title "Kartalla" 700 13; rows 400 12: selected route swatch 22×5 theme, other routes

@@ -8,8 +8,9 @@ import type { LayerState } from './layers'
 
 /**
  * Layer picker popover (UI-SPEC 3.4): a radio list of the available `base` layers plus "no base
- * map", and a checkbox list of the other slots. Each row carries the layer's attribution and
- * fetch date. Opening, closing and focus return are MapView's job; this only edits the state.
+ * map", and a checkbox list that starts with the frontend-only "services on the route" entry
+ * and continues with the other slots. Each catalog row carries the layer's attribution and fetch
+ * date. Opening, closing and focus return are MapView's job; this only edits the state.
  */
 const props = defineProps<{
   /** Layers offered in this view (`availableLayers`), in catalog order. */
@@ -32,6 +33,9 @@ function caption(layer: PublishedLayer): string {
 }
 function setBase(id: string | null) {
   state.value = { ...state.value, base: id }
+}
+function setServices(on: boolean) {
+  state.value = { ...state.value, services: on }
 }
 function toggle(id: string, on: boolean) {
   const next = new Set(state.value.on)
@@ -71,8 +75,19 @@ function toggle(id: string, on: boolean) {
         >
       </label>
     </fieldset>
-    <fieldset v-if="overlays.length" class="group">
+    <fieldset class="group">
       <legend class="eyebrow">{{ t('layers.overlays') }}</legend>
+      <label class="row">
+        <input
+          type="checkbox"
+          value="services"
+          :checked="state.services"
+          @change="setServices(($event.target as HTMLInputElement).checked)"
+        />
+        <span class="texts"
+          ><span class="name">{{ t('layers.services') }}</span></span
+        >
+      </label>
       <label v-for="layer in overlays" :key="layer.id" class="row">
         <input
           type="checkbox"

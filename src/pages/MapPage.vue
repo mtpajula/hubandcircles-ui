@@ -29,6 +29,8 @@ const highlighted = ref<string | null>(null)
 /** Band cursor and hardest-section km of the open route, shared by the card and the map. */
 const cursorKm = ref<number | null>(null)
 const hardestKm = ref<number | null>(null)
+/** Service id the card asked the map to fly to; the map clears it after the flight. */
+const focusService = ref<string | null>(null)
 /** `nearby_services` of the open route (from route.json, loaded by the card) for the map markers. */
 const nearbyServices = ref<NearbyService[]>([])
 
@@ -51,6 +53,7 @@ watch(themeId, () => (highlighted.value = null))
 watch(openRoute, () => {
   cursorKm.value = null
   hardestKm.value = null
+  focusService.value = null
   nearbyServices.value = []
 })
 </script>
@@ -85,6 +88,7 @@ watch(openRoute, () => {
               v-model:highlighted-route="highlighted"
               v-model:cursor-km="cursorKm"
               v-model:hardest-km="hardestKm"
+              v-model:focus-service="focusService"
               v-model:nearby-services="nearbyServices"
               :catalog="catalog"
               :theme="theme"
@@ -98,6 +102,7 @@ watch(openRoute, () => {
           v-model:highlighted-route="highlighted"
           v-model:cursor-km="cursorKm"
           v-model:hardest-km="hardestKm"
+          v-model:focus-service="focusService"
           :catalog="catalog"
           :theme="theme"
           :open-route="openRoute"
