@@ -34,6 +34,12 @@ export type ItrsTechnicalShares = {
 } | null
 export type LengthKm = number
 export type LipasId = number | null
+export type LongestServiceGap = {
+  [k: string]: ServiceGap
+} | null
+export type EndKm = number
+export type Km1 = number
+export type StartKm = number
 export type Maintainer = ('municipal' | 'non_municipal') | null
 export type MaintenanceNote = {
   [k: string]: string
@@ -43,7 +49,9 @@ export type Author = string
 export type License = string
 export type Location = [number, number] | null
 export type TakenAt = string | null
-export type NearbyServices = string[]
+export type Id1 = string
+export type Km2 = number
+export type NearbyServices = NearbyService[]
 export type NonMunicipalReasons = (
   | 'private_road_no_permission'
   | 'unmarked'
@@ -60,13 +68,16 @@ export type Type2 = 'video'
 export type Url = string
 export type Type3 = 'elevation_profile'
 export type Sections = (TextSection | GallerySection | VideoSection | ElevationProfileSection)[]
-export type EndKm = number
+export type EndKm1 = number
 export type ItrsTechnical = ('green' | 'blue' | 'red' | 'black' | 'orange') | null
-export type StartKm = number
+export type StartKm1 = number
 export type Surface = ('asphalt' | 'paving' | 'gravel' | 'trail' | 'boardwalk' | 'snow') | null
 export type Traffic = ('separated' | 'quiet' | 'busy') | null
 export type Segments = PublishedSegment[]
 export type SeparatedShare = number | null
+export type ServiceGaps = {
+  [k: string]: number
+} | null
 export type SurfaceShares = {
   [k: string]: number
 } | null
@@ -97,6 +108,7 @@ export interface PublishedRoute {
   itrs_technical_shares?: ItrsTechnicalShares
   length_km: LengthKm
   lipas_id?: LipasId
+  longest_service_gap?: LongestServiceGap
   maintainer?: Maintainer
   maintenance_note?: MaintenanceNote
   maintenance_url?: MaintenanceUrl
@@ -109,6 +121,7 @@ export interface PublishedRoute {
   sections: Sections
   segments?: Segments
   separated_share?: SeparatedShare
+  service_gaps?: ServiceGaps
   surface_shares?: SurfaceShares
   themes: Themes
   track: Track
@@ -131,6 +144,14 @@ export interface Itrs {
   technical?: Technical
   wilderness?: Wilderness
 }
+/**
+ * The longest stretch without a service of the theme's first categories (7.11).
+ */
+export interface ServiceGap {
+  end_km: EndKm
+  km: Km1
+  start_km: StartKm
+}
 export interface Media1 {
   [k: string]: PublishedMedia
 }
@@ -149,6 +170,13 @@ export interface Sizes {
 }
 export interface Name {
   [k: string]: string
+}
+/**
+ * A service point within `nearby_services_m` of the track, at its km (5.3).
+ */
+export interface NearbyService {
+  id: Id1
+  km: Km2
 }
 export interface TextSection {
   content: Content
@@ -172,9 +200,9 @@ export interface ElevationProfileSection {
  * Normalised segment (5.3): a gap is a segment whose attributes are all None.
  */
 export interface PublishedSegment {
-  end_km: EndKm
+  end_km: EndKm1
   itrs_technical?: ItrsTechnical
-  start_km: StartKm
+  start_km: StartKm1
   surface?: Surface
   traffic?: Traffic
 }

@@ -53,6 +53,9 @@
   --color-notice-icon: #9a6414;
   --color-map-land: #edf1f0;
   --color-map-land-alt: #e1e9dc;
+  /* 3.4 Service markers: default icon circle is river; lean_to/hut use touring green. */
+  --color-service: var(--color-river);
+  --color-service-shelter: #3f6b4a;
   --color-white: #ffffff;
   --color-white-92: #fffffff2;
   --color-white-86: #ffffffdb;

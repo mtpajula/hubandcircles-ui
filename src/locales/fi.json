@@ -60,7 +60,8 @@
     "selected": "Valittu: {name}",
     "layers": "Tasot",
     "zoomIn": "Lähennä",
-    "zoomOut": "Loitonna"
+    "zoomOut": "Loitonna",
+    "legendPrimary": "teeman ensisijainen"
   },
   "report": {
     "button": "Ilmoita ongelmasta",
@@ -206,5 +207,40 @@
     "title": "Video",
     "player": "Videosoitin",
     "link": "Avaa video"
+  },
+  "service": {
+    "title": "Palvelut reitillä",
+    "caption": "{names} ensin",
+    "and": "ja",
+    "km": "km {km}",
+    "marker": "{name}, km {km}",
+    "gapTitle": "Pisin väli ilman palveluja",
+    "gapRange": "km {start} → {end}",
+    "source": "Lähde: {source}",
+    "fetched": "haettu {date}",
+    "showSource": "Näytä lähde",
+    "openingHours": "Aukiolo",
+    "severity": "Vakavuus",
+    "reportedAt": "Ilmoitettu",
+    "validUntil": "Voimassa",
+    "close": "Sulje",
+    "sourceName": {
+      "osm": "OpenStreetMap",
+      "visitfinland": "Visit Finland",
+      "manual": "ylläpitäjän merkintä"
+    },
+    "category": {
+      "cafe": "kahvila",
+      "restaurant": "ravintola",
+      "shop": "kauppa",
+      "accommodation": "majoitus",
+      "bike_repair": "pyöräkorjaamo",
+      "bike_rental": "pyörävuokraamo",
+      "water": "vesipiste",
+      "toilet": "WC",
+      "lean_to": "laavu",
+      "hut": "tupa",
+      "issue": "ongelmakohta"
+    }
   }
 }

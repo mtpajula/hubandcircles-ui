@@ -11,17 +11,26 @@ import {
   type StyleSpecification,
 } from 'maplibre-gl'
 import type { Feature, FeatureCollection } from 'geojson'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import PoiPopup from '../components/PoiPopup.vue'
+import ServiceIcon from '../components/ServiceIcon.vue'
 import { BASEMAP_URL } from '../config'
 import { mixWithWhite } from '../data/color'
 import { loadOverview, routeEndpoints } from '../data/overview'
 import { dataPath } from '../data/paths'
+import {
+  loadServices,
+  serviceById,
+  type ServiceCollection,
+  type ServiceFeature,
+} from '../data/services'
 import { loadTrack, nearestKm, pointAtKm, type TrackFeature } from '../data/track'
 import { formatKm } from '../i18n/format'
 import { langText } from '../i18n/language'
 import { cssVar } from '../theme'
 import type { Catalog, Theme } from '../types/catalog'
+import type { NearbyService } from '../types/route'
 import Legend from './Legend.vue'
 import './worker'
 import { unionBboxes } from './bbox'
@@ -37,6 +46,8 @@ const props = defineProps<{
   theme: Theme | null
   openRoute: string | null
   lang: string
+  /** `nearby_services` of the open route (route.json), drawn as service pills (UI-SPEC 3.4). */
+  nearbyServices?: NearbyService[]
 }>()
 
 /** Highlighted route: set from the list (hover/focus) and from a click on a line. */
@@ -46,11 +57,15 @@ const cursorKm = defineModel<number | null>('cursorKm', { default: null })
 /** Hardest-section km the card asked to show (UI-SPEC 4.3): marker and flyTo. */
 const hardestKm = defineModel<number | null>('hardestKm', { default: null })
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 
 const ROVANIEMI: [number, number] = [25.72, 66.5]
 const EMPTY: FeatureCollection = { type: 'FeatureCollection', features: [] }
 const ROUTE_LAYERS = ['overview-casing', 'overview-line'] as const
+/** Service pills are HTML overlays; the count is capped so that a long route stays light. */
+const MAX_PILLS = 30
+/** The plain service circles (no route open) appear from this zoom on (UI-SPEC 3.4). */
+const SERVICES_MIN_ZOOM = 12
 
 const container = ref<HTMLDivElement | null>(null)
 let map: MapLibreMap | null = null
@@ -59,6 +74,11 @@ let ready: Promise<void> = Promise.resolve()
 let track: TrackFeature | null = null
 /** Bumped on every map move so that the marker positions below are recomputed. */
 const viewVersion = ref(0)
+/** services.geojson (`catalog.services`), loaded once for the circles, the pills and the popup. */
+const services = shallowRef<ServiceCollection | null>(null)
+const serviceIndex = computed(() => (services.value ? serviceById(services.value) : null))
+/** Service point whose popup is open, with its km when it sits on the open route. */
+const selected = shallowRef<{ feature: ServiceFeature; km: number | null } | null>(null)
 
 const highlightedName = computed(() => {
   const r = props.catalog.routes.find((x) => x.id === highlighted.value)
@@ -132,6 +152,9 @@ function paint(m: MapLibreMap) {
   m.setPaintProperty('overview-line', 'line-width', ['case', isHighlighted(), 6, 4])
   m.setPaintProperty('route-line', 'line-color', cssVar('--theme-highlight'))
   m.setPaintProperty('endpoints', 'circle-stroke-color', color)
+  m.setPaintProperty('services', 'circle-stroke-color', cssVar('--theme-primary'))
+  // With a route open its nearby services are pills; the plain circles would only add noise.
+  m.setLayoutProperty('services', 'visibility', props.openRoute ? 'none' : 'visible')
 }
 
 // ---- style and layers --------------------------------------------------------------------------
@@ -150,6 +173,7 @@ function style(): StyleSpecification {
       overview: { type: 'geojson', data: EMPTY },
       endpoints: { type: 'geojson', data: EMPTY },
       route: { type: 'geojson', data: EMPTY },
+      services: { type: 'geojson', data: EMPTY },
     },
     layers: [
       { id: 'basemap', type: 'raster', source: 'basemap' },
@@ -197,6 +221,22 @@ function addRouteLayers(m: MapLibreMap) {
     },
     slotAnchor('points'),
   )
+  m.addLayer(
+    {
+      id: 'services',
+      type: 'circle',
+      source: 'services',
+      minzoom: SERVICES_MIN_ZOOM,
+      // Issues are drawn as HTML issue markers (UI-SPEC 3.4), not as plain circles.
+      filter: ['!=', ['get', 'category'], 'issue'],
+      paint: {
+        'circle-radius': 6,
+        'circle-color': cssVar('--color-white'),
+        'circle-stroke-width': 2,
+      },
+    },
+    slotAnchor('points'),
+  )
   paint(m)
 
   const pick = (e: MapMouseEvent & { features?: Feature[] }) => {
@@ -216,6 +256,15 @@ function addRouteLayers(m: MapLibreMap) {
   m.on('click', 'route-line', toCursor)
   m.on('mouseenter', 'route-line', () => (m.getCanvas().style.cursor = 'crosshair'))
   m.on('mouseleave', 'route-line', () => (m.getCanvas().style.cursor = ''))
+  // A plain service circle opens the popup; the feature is looked up by id because MapLibre
+  // flattens nested properties (the name object) to strings.
+  m.on('click', 'services', (e: MapMouseEvent & { features?: Feature[] }) => {
+    const id = e.features?.[0]?.properties?.id
+    const feature = typeof id === 'string' ? serviceIndex.value?.get(id) : undefined
+    if (feature) select(feature, null)
+  })
+  m.on('mouseenter', 'services', () => (m.getCanvas().style.cursor = 'pointer'))
+  m.on('mouseleave', 'services', () => (m.getCanvas().style.cursor = ''))
 }
 
 // ---- markers (UI-SPEC 3.4, 4.3) ----------------------------------------------------------------
@@ -238,6 +287,80 @@ const hardestLabel = computed(() =>
     : t('hardest.marker', { km: formatKm(props.lang, hardestKm.value) }),
 )
 const translate = (p: { x: number; y: number }) => ({ transform: `translate(${p.x}px, ${p.y}px)` })
+
+// ---- service markers (UI-SPEC 3.4) --------------------------------------------------------------
+
+type ServiceMarker = { feature: ServiceFeature; km: number | null; x: number; y: number }
+
+/** The nearby services of the open route resolved to features, first `MAX_PILLS` of them. */
+const nearbyFeatures = computed(() => {
+  const index = serviceIndex.value
+  if (!index || !props.openRoute) return []
+  const out: { feature: ServiceFeature; km: number }[] = []
+  for (const { id, km } of props.nearbyServices ?? []) {
+    const feature = index.get(id)
+    if (feature) out.push({ feature, km })
+    if (out.length >= MAX_PILLS) break
+  }
+  return out
+})
+/** Every issue of the collection while no route is open; a route shows its nearby ones. */
+const issueFeatures = computed(() =>
+  props.openRoute
+    ? nearbyFeatures.value.filter((x) => x.feature.properties.category === 'issue')
+    : (services.value?.features ?? [])
+        .filter((f) => f.properties.category === 'issue')
+        .map((feature) => ({ feature, km: null })),
+)
+
+function project(items: { feature: ServiceFeature; km: number | null }[]): ServiceMarker[] {
+  void viewVersion.value
+  const m = map
+  if (!m) return []
+  return items.map(({ feature, km }) => {
+    const [lng, lat] = feature.geometry.coordinates
+    const { x, y } = m.project([lng!, lat!])
+    return { feature, km, x, y }
+  })
+}
+const pills = computed(() =>
+  project(nearbyFeatures.value.filter((x) => x.feature.properties.category !== 'issue')),
+)
+const issues = computed(() => project(issueFeatures.value))
+const popupPx = computed(() => project(selected.value ? [selected.value] : [])[0] ?? null)
+
+function serviceName(feature: ServiceFeature): string {
+  const { name, category } = feature.properties
+  if (name) return langText(name, props.lang, props.catalog.project.default_language)
+  const key = `service.category.${category}`
+  return te(key) ? t(key) : category
+}
+function pillKm(km: number | null): string {
+  return km === null ? '' : t('service.km', { km: formatKm(props.lang, km) })
+}
+function pillLabel(marker: ServiceMarker): string {
+  const name = serviceName(marker.feature)
+  return marker.km === null
+    ? name
+    : t('service.marker', { name, km: formatKm(props.lang, marker.km) })
+}
+function select(feature: ServiceFeature, km: number | null) {
+  selected.value = selected.value?.feature === feature ? null : { feature, km }
+}
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') selected.value = null
+}
+
+async function loadServicePoints(m: MapLibreMap) {
+  if (!props.catalog.services) return
+  try {
+    const collection = await loadServices(dataPath(props.catalog.services))
+    services.value = collection
+    ;(m.getSource('services') as GeoJSONSource | undefined)?.setData(collection)
+  } catch (e) {
+    console.warn('services.geojson could not be loaded', e)
+  }
+}
 
 function flyToHardest(m: MapLibreMap) {
   const point = track && hardestKm.value !== null ? pointAtKm(track, hardestKm.value) : null
@@ -266,6 +389,7 @@ async function updateOpenRoute(m: MapLibreMap, id: string | null) {
   const source = m.getSource('route') as GeoJSONSource | undefined
   if (!source) return
   track = null
+  selected.value = null
   viewVersion.value++
   if (!id) {
     source.setData(EMPTY)
@@ -309,15 +433,18 @@ onMounted(() => {
     addRouteLayers(m)
     void updateOpenRoute(m, props.openRoute)
     void loadRoutes(m)
+    void loadServicePoints(m)
   })
+  window.addEventListener('keydown', onKeydown)
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
   map?.remove()
   map = null
 })
 
-watch([() => props.theme, highlighted], () => {
+watch([() => props.theme, highlighted, () => props.openRoute], () => {
   void ready.then(() => {
     if (map) paint(map)
   })
@@ -353,6 +480,40 @@ watch(hardestKm, () => {
         <span class="hardest-dot"></span>
       </div>
     </div>
+    <button
+      v-for="marker in pills"
+      :key="marker.feature.properties.id"
+      type="button"
+      class="service-pill"
+      :style="translate(marker)"
+      :aria-label="pillLabel(marker)"
+      @click="select(marker.feature, marker.km)"
+    >
+      <ServiceIcon :category="marker.feature.properties.category" :size="24" />
+      <span class="pill-name">{{ serviceName(marker.feature) }}</span>
+      <span v-if="marker.km !== null" class="pill-km">{{ pillKm(marker.km) }}</span>
+    </button>
+    <button
+      v-for="marker in issues"
+      :key="marker.feature.properties.id"
+      type="button"
+      class="issue-marker"
+      :style="translate(marker)"
+      :aria-label="pillLabel(marker)"
+      @click="select(marker.feature, marker.km)"
+    >
+      !
+    </button>
+    <div v-if="selected && popupPx" class="popup-anchor" :style="translate(popupPx)">
+      <PoiPopup
+        class="popup"
+        :service="selected.feature.properties"
+        :km="selected.km"
+        :lang="lang"
+        :default-lang="catalog.project.default_language"
+        @close="selected = null"
+      />
+    </div>
     <p v-if="highlightedName" class="badge" role="status">
       {{ t('map.selected', { name: highlightedName }) }}
     </p>
@@ -366,6 +527,7 @@ watch(hardestKm, () => {
   width: 100%;
   height: 100%;
   min-height: var(--map-strip-height);
+  overflow: hidden;
 }
 .map {
   position: absolute;
@@ -480,6 +642,68 @@ watch(hardestKm, () => {
   background: var(--itrs-red);
   border: 3px solid var(--color-white);
   box-shadow: var(--shadow-control);
+}
+/* Service pill (UI-SPEC 3.4): 34 h white pill, the 24 px icon circle centred on the point. */
+.service-pill {
+  position: absolute;
+  top: -17px;
+  left: -18px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-7);
+  height: 34px;
+  padding: 0 11px 0 6px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--color-white);
+  box-shadow: var(--shadow-control);
+  color: var(--color-ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pill-name {
+  font: 600 13px/1 var(--font-family);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pill-km {
+  font: var(--text-caption-lg);
+  line-height: 1;
+  color: var(--color-ink-muted);
+}
+/* Issue marker: 30 px white circle, midnight-sun ring, "!" in gravel (UI-SPEC 3.4). */
+.issue-marker {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  z-index: 1;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 2.5px solid var(--color-midnight-sun);
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: var(--color-white);
+  box-shadow: var(--shadow-control);
+  color: var(--color-notice-icon);
+  font: 700 13px/1 var(--font-family);
+  cursor: pointer;
+}
+/* Popup hangs above the point, centred. */
+.popup-anchor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 0;
+  height: 0;
+}
+.popup {
+  position: absolute;
+  bottom: 22px;
+  left: -120px;
 }
 @media (max-width: 699px) {
   .legend {

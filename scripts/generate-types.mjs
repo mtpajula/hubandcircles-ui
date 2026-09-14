@@ -11,7 +11,7 @@ const outDir = path.join(root, 'src', 'types')
 
 // The contract is the published data schema (chapter 11). Source data and tool models are not
 // part of the frontend. Schema name -> output file name (without .ts).
-const CONTRACT = { catalog: 'catalog', publishedroute: 'route' }
+const CONTRACT = { catalog: 'catalog', publishedroute: 'route', service: 'service' }
 const files = (await readdir(schemaDir))
   .filter((n) => n.replace(/\.schema\.json$/, '') in CONTRACT)
   .sort()

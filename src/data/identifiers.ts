@@ -29,3 +29,21 @@ export const NON_MUNICIPAL_REASONS = [
   'everymans_rights_terrain',
   'seasonal',
 ] as const
+
+/** Service point categories (5.5); `issue` is drawn as the issue marker, the rest as service pills. */
+export const SERVICE_CATEGORIES = [
+  'cafe',
+  'restaurant',
+  'shop',
+  'accommodation',
+  'bike_repair',
+  'bike_rental',
+  'water',
+  'toilet',
+  'lean_to',
+  'hut',
+  'issue',
+] as const
+
+/** Shelter categories use the touring green icon circle instead of river (UI-SPEC 3.4). */
+export const SHELTER_CATEGORIES = ['lean_to', 'hut'] as const

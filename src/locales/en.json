@@ -60,7 +60,8 @@
     "selected": "Selected: {name}",
     "layers": "Layers",
     "zoomIn": "Zoom in",
-    "zoomOut": "Zoom out"
+    "zoomOut": "Zoom out",
+    "legendPrimary": "theme priority"
   },
   "report": {
     "button": "Report a problem",
@@ -206,5 +207,40 @@
     "title": "Video",
     "player": "Video player",
     "link": "Open video"
+  },
+  "service": {
+    "title": "Services on the route",
+    "caption": "{names} first",
+    "and": "and",
+    "km": "km {km}",
+    "marker": "{name}, km {km}",
+    "gapTitle": "Longest stretch without services",
+    "gapRange": "km {start} → {end}",
+    "source": "Source: {source}",
+    "fetched": "fetched {date}",
+    "showSource": "Show source",
+    "openingHours": "Opening hours",
+    "severity": "Severity",
+    "reportedAt": "Reported",
+    "validUntil": "Valid until",
+    "close": "Close",
+    "sourceName": {
+      "osm": "OpenStreetMap",
+      "visitfinland": "Visit Finland",
+      "manual": "maintainer entry"
+    },
+    "category": {
+      "cafe": "café",
+      "restaurant": "restaurant",
+      "shop": "shop",
+      "accommodation": "accommodation",
+      "bike_repair": "bike repair",
+      "bike_rental": "bike rental",
+      "water": "water point",
+      "toilet": "toilet",
+      "lean_to": "lean-to",
+      "hut": "hut",
+      "issue": "issue"
+    }
   }
 }

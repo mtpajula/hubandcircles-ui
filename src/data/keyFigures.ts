@@ -15,7 +15,9 @@ export type KeyFigureSource = Pick<
   | 'surface_shares'
   | 'separated_share'
   | 'winter_maintenance'
->
+> &
+  /** Only route.json carries the gap; the list card (catalog summary) never shows it. */
+  Partial<Pick<PublishedRoute, 'longest_service_gap'>>
 
 /** A key figure resolved from the route; the component only formats and translates. */
 export type KeyFigure =
@@ -29,7 +31,7 @@ export type KeyFigure =
   | { id: KeyFigureId; kind: 'itrs'; level: ItrsLevel | null }
   | { id: KeyFigureId; kind: 'shares'; shares: Record<string, number> }
 
-function resolve(id: KeyFigureId, route: KeyFigureSource): KeyFigure | null {
+function resolve(id: KeyFigureId, route: KeyFigureSource, themeId?: string): KeyFigure | null {
   const itrs = route.itrs ?? {}
   switch (id) {
     case 'length':
@@ -64,24 +66,28 @@ function resolve(id: KeyFigureId, route: KeyFigureSource): KeyFigure | null {
       return route.winter_maintenance
         ? { id, kind: 'term', group: 'winterMaintenance', value: route.winter_maintenance }
         : null
-    case 'longest_service_gap':
-      // V3: services are not built yet; the figure is not in route.json.
-      return null
+    case 'longest_service_gap': {
+      // Theme-specific (5.3): the gap of the theme's own service categories.
+      const gap = themeId ? route.longest_service_gap?.[themeId] : undefined
+      return gap ? { id, kind: 'km', value: gap.km } : null
+    }
   }
 }
 
 /**
  * Key figures of a route in the theme's order (UI-SPEC 4.2 item 3). Missing data hides the tile
- * (P11) except ITRS technical/endurance, which show "Not rated". `limit` counts shown tiles.
+ * (P11) except ITRS technical/endurance, which show "Not rated". `limit` counts shown tiles;
+ * `themeId` picks the theme's `longest_service_gap`.
  */
 export function keyFigures(
   ids: readonly KeyFigureId[],
   route: KeyFigureSource,
   limit = Infinity,
+  themeId?: string,
 ): KeyFigure[] {
   const out: KeyFigure[] = []
   for (const id of ids) {
-    const figure = resolve(id, route)
+    const figure = resolve(id, route, themeId)
     if (figure) out.push(figure)
     if (out.length >= limit) break
   }

@@ -22,12 +22,14 @@ const props = withDefaults(
     lang: string
     limit?: number
     compact?: boolean
+    /** Theme whose `longest_service_gap` is shown (5.3); without it the figure is hidden. */
+    themeId?: string
   }>(),
-  { limit: undefined, compact: false },
+  { limit: undefined, compact: false, themeId: undefined },
 )
 const { t, te } = useI18n()
 
-const tiles = computed(() => keyFigures(props.figures, props.route, props.limit))
+const tiles = computed(() => keyFigures(props.figures, props.route, props.limit, props.themeId))
 const footnote = computed(() => (props.compact ? null : itrsFootnote(props.figures, props.route)))
 
 /** Fixed identifiers (P4): translate when known, otherwise show the raw value. */

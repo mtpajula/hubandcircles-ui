@@ -12,6 +12,7 @@ import { langText } from '../i18n/language'
 import MapView from '../map/MapView.vue'
 import { applyTheme } from '../theme'
 import type { Catalog } from '../types/catalog'
+import type { NearbyService } from '../types/route'
 
 /**
  * Map page (UI-SPEC 3.1): header with logo, theme pills, report button and language switch;
@@ -28,6 +29,8 @@ const highlighted = ref<string | null>(null)
 /** Band cursor and hardest-section km of the open route, shared by the card and the map. */
 const cursorKm = ref<number | null>(null)
 const hardestKm = ref<number | null>(null)
+/** `nearby_services` of the open route (from route.json, loaded by the card) for the map markers. */
+const nearbyServices = ref<NearbyService[]>([])
 
 const lang = computed(() => String(route.params.lang))
 const defaultLang = computed(() => props.catalog.project.default_language)
@@ -48,6 +51,7 @@ watch(themeId, () => (highlighted.value = null))
 watch(openRoute, () => {
   cursorKm.value = null
   hardestKm.value = null
+  nearbyServices.value = []
 })
 </script>
 
@@ -81,6 +85,7 @@ watch(openRoute, () => {
               v-model:highlighted-route="highlighted"
               v-model:cursor-km="cursorKm"
               v-model:hardest-km="hardestKm"
+              v-model:nearby-services="nearbyServices"
               :catalog="catalog"
               :theme="theme"
               :lang="lang"
@@ -96,6 +101,7 @@ watch(openRoute, () => {
           :catalog="catalog"
           :theme="theme"
           :open-route="openRoute"
+          :nearby-services="nearbyServices"
           :lang="lang"
         />
       </main>

@@ -66,6 +66,19 @@ describe('keyFigures', () => {
     expect(keyFigures(['surface_shares'], { ...bare, surface_shares: {} })).toEqual([])
   })
 
+  it('shows the longest service gap of the given theme only (5.3)', () => {
+    const route = {
+      ...bare,
+      longest_service_gap: { mtb: { km: 9.7, start_km: 12.7, end_km: 22.4 } },
+    }
+    expect(keyFigures(['longest_service_gap'], route, Infinity, 'mtb')).toEqual([
+      { id: 'longest_service_gap', kind: 'km', value: 9.7 },
+    ])
+    expect(keyFigures(['longest_service_gap'], route, Infinity, 'gravel')).toEqual([])
+    expect(keyFigures(['longest_service_gap'], route)).toEqual([])
+    expect(keyFigures(['longest_service_gap'], bare, Infinity, 'mtb')).toEqual([])
+  })
+
   it('limits the number of shown tiles, not of theme ids', () => {
     const ids = ['length', 'ascent', 'surface_shares', 'itrs_endurance'] as const
     expect(keyFigures(ids, full, 3).map((f) => f.id)).toEqual([

@@ -9,29 +9,33 @@ import { dataPath } from '../data/paths'
 import { cardTheme, presentationOf } from '../data/presentation'
 import { loadRoute } from '../data/route'
 import { filterRoutesByTheme } from '../data/routes'
+import { loadServices, nearbyOrdered, serviceById, type ServiceCollection } from '../data/services'
 import { formatKm } from '../i18n/format'
 import { langText } from '../i18n/language'
 import { sectionComponent } from '../sections'
 import type { Catalog, Theme } from '../types/catalog'
-import type { PublishedRoute } from '../types/route'
+import type { NearbyService, PublishedRoute } from '../types/route'
 import GpxButton from './GpxButton.vue'
 import ItrsBadge from './ItrsBadge.vue'
 import KeyFigures from './KeyFigures.vue'
 import MaintenanceNotice from './MaintenanceNotice.vue'
 import RouteBand from './RouteBand.vue'
+import RouteServices from './RouteServices.vue'
 import ShareBar from './ShareBar.vue'
 
 /**
  * Route card panel (UI-SPEC 4.1–4.2, mobile 5.1). The theme's `presentation` decides the key
  * figures, the band lanes, the hero image and the block order: `hero_image: hardest_section`
  * themes put key figures and the hardest section first, `cover_image` themes the cover and the
- * shares. Under `all` the route's first theme is used. Services and ride mode are V2 slots.
+ * shares. Under `all` the route's first theme is used. Ride mode is a V2 slot.
  */
 defineOptions({ inheritAttrs: false })
 const props = defineProps<{ catalog: Catalog; theme: Theme | null; lang: string }>()
 /** Band cursor and hardest-section km, mirrored on the map by MapPage. */
 const cursorKm = defineModel<number | null>('cursorKm', { default: null })
 const hardestKm = defineModel<number | null>('hardestKm', { default: null })
+/** `nearby_services` of the loaded route, handed to the map for its markers (UI-SPEC 3.4). */
+const nearbyServices = defineModel<NearbyService[]>('nearbyServices', { default: () => [] })
 const { t, te } = useI18n()
 const route = useRoute()
 const mobile = useMediaQuery('(max-width: 699px)')
@@ -86,9 +90,10 @@ const seasons = computed(() =>
   (published.value?.seasons ?? []).map((s) => label('season', s)).join(', '),
 )
 const gpxHref = computed(() => (published.value?.gpx ? dataPath(published.value.gpx) : null))
-const presentation = computed(() =>
-  presentationOf(cardTheme(props.catalog.themes, props.theme, published.value?.themes ?? [])),
+const presentationTheme = computed(() =>
+  cardTheme(props.catalog.themes, props.theme, published.value?.themes ?? []),
 )
+const presentation = computed(() => presentationOf(presentationTheme.value))
 
 // ---- images ------------------------------------------------------------------------------------
 
@@ -159,11 +164,38 @@ const shareBars = computed(() => {
   return bars.filter((b) => Object.keys(b.shares).length > 0)
 })
 
+// ---- services (UI-SPEC 4.2 item 7) --------------------------------------------------------------
+
+const services = ref<ServiceCollection | null>(null)
+watch(
+  () => (published.value?.nearby_services?.length ? props.catalog.services : null),
+  async (url) => {
+    if (!url || services.value) return
+    try {
+      services.value = await loadServices(dataPath(url))
+    } catch (e) {
+      console.warn('services.geojson could not be loaded', e)
+    }
+  },
+  { immediate: true },
+)
+watch(published, (r) => (nearbyServices.value = r?.nearby_services ?? []))
+const byId = computed(() => (services.value ? serviceById(services.value) : null))
+const nearby = computed(() =>
+  published.value && byId.value
+    ? nearbyOrdered(published.value, byId.value, presentation.value.service_categories_first)
+    : [],
+)
+const serviceGap = computed(() => {
+  const id = presentationTheme.value?.id
+  return (id && published.value?.longest_service_gap?.[id]) || null
+})
+
 /** Block order per theme (UI-SPEC 4.2 intro); the description sections always come last. */
 const blocks = computed(() =>
   presentation.value.hero_image === 'cover_image'
-    ? ['cover', 'keyFigures', 'shares', 'band', 'hardest']
-    : ['keyFigures', 'hardest', 'band', 'shares'],
+    ? ['cover', 'keyFigures', 'shares', 'band', 'hardest', 'services']
+    : ['keyFigures', 'hardest', 'band', 'shares', 'services'],
 )
 </script>
 
@@ -226,7 +258,12 @@ const blocks = computed(() =>
         />
         <section v-else-if="block === 'keyFigures'" class="block">
           <h2 class="eyebrow">{{ t('route.keyFigures') }}</h2>
-          <KeyFigures :figures="presentation.key_figures" :route="published" :lang="lang" />
+          <KeyFigures
+            :figures="presentation.key_figures"
+            :route="published"
+            :lang="lang"
+            :theme-id="presentationTheme?.id"
+          />
         </section>
         <section v-else-if="block === 'hardest' && hardest" class="block">
           <h2 class="eyebrow">{{ t('hardest.title') }}</h2>
@@ -275,8 +312,16 @@ const blocks = computed(() =>
             <ShareBar :shares="bar.shares" :kind="bar.kind" :lang="lang" />
           </section>
         </template>
+        <RouteServices
+          v-else-if="block === 'services'"
+          v-model:cursor-km="cursorKm"
+          :entries="nearby"
+          :categories-first="presentation.service_categories_first"
+          :gap="serviceGap"
+          :lang="lang"
+          :default-lang="defaultLang"
+        />
       </template>
-      <!-- V2: services list, longest gap -->
       <section v-if="published.sections.length" class="block description">
         <template v-for="(section, i) in published.sections" :key="i">
           <template v-if="section.type === 'elevation_profile'">

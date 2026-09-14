@@ -1,14 +1,25 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ServiceIcon from '../components/ServiceIcon.vue'
+import { presentationOf } from '../data/presentation'
 import type { Theme } from '../types/catalog'
 
 /**
- * "On the map" legend box (UI-SPEC 3.4). Rows in V1: selected route, other routes, topo coverage
- * boundary, divider, issue marker. Service category rows arrive with the services layer (V3).
- * Swatch colors come from the --theme-* variables, so the box follows the theme by itself.
+ * "On the map" legend box (UI-SPEC 3.4): selected route, other routes, topo coverage boundary,
+ * divider, the theme's priority service categories (the first one labelled as such) and the
+ * issue marker. Swatch colors come from the --theme-* variables, so the box follows the theme.
  */
-defineProps<{ theme: Theme | null }>()
-const { t } = useI18n()
+const props = defineProps<{ theme: Theme | null }>()
+const { t, te } = useI18n()
+
+const categories = computed(() =>
+  presentationOf(props.theme).service_categories_first.map((id, i) => {
+    const key = `service.category.${id}`
+    const label = te(key) ? t(key) : id
+    return { id, label: i === 0 ? `${label} · ${t('map.legendPrimary')}` : label }
+  }),
+)
 </script>
 
 <template>
@@ -25,6 +36,9 @@ const { t } = useI18n()
         <span class="swatch coverage" aria-hidden="true"></span>{{ t('map.legendCoverage') }}
       </li>
       <li class="divider" role="separator"></li>
+      <li v-for="c in categories" :key="c.id" class="row">
+        <ServiceIcon class="category" :category="c.id" :size="16" />{{ c.label }}
+      </li>
       <li class="row"><span class="issue" aria-hidden="true">!</span>{{ t('map.legendIssue') }}</li>
     </ul>
   </div>
@@ -82,6 +96,9 @@ const { t } = useI18n()
   height: 0;
   border-top: 1px solid var(--color-border-soft);
   margin: var(--gap-4) 0;
+}
+.category {
+  margin: 0 3px;
 }
 .issue {
   flex: none;
