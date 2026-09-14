@@ -52,6 +52,7 @@ import {
   layerSpecs,
   mergedAttribution,
   osmVisible,
+  osmZoomRange,
   parseNestedProperties,
   readState,
   storageKey,
@@ -276,7 +277,11 @@ function applyLayers(m: MapLibreMap) {
     for (const layerId of ids)
       if (m.getLayer(layerId))
         m.setLayoutProperty(layerId, 'visibility', visible.has(id) ? 'visible' : 'none')
-  m.setLayoutProperty('basemap', 'visibility', osmVisible(layerState.value) ? 'visible' : 'none')
+  // OSM stays visible below the base layer's minzoom (the range trick avoids zoom listeners).
+  const [osmMin, osmMax] = osmZoomRange(layerState.value, catalogLayers.value)
+  const osmOn = osmVisible(layerState.value) || osmMax < 24
+  m.setLayerZoomRange('basemap', osmMin, osmOn && !osmVisible(layerState.value) ? osmMax : 24)
+  m.setLayoutProperty('basemap', 'visibility', osmOn ? 'visible' : 'none')
   m.setLayoutProperty('services', 'visibility', servicesVisibility())
   layersControl?.setDisabled(catalogLayers.value.length === 0)
 }

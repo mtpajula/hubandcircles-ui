@@ -11,6 +11,7 @@ import {
   mergedAttribution,
   onInitially,
   osmVisible,
+  osmZoomRange,
   parseNestedProperties,
   readState,
   storageKey,
@@ -319,5 +320,14 @@ describe('coverageSpecs()', () => {
     expect(coverageOn(coverage, [toner, aerial])).toBe(true)
     expect(coverageOn(coverage, [aerial])).toBe(false)
     expect(coverageOn(undefined, [toner])).toBe(false)
+  })
+})
+
+describe('osmZoomRange()', () => {
+  const base = { id: 'b', slot: 'base', minzoom: 12 } as never
+  it('keeps OSM below the base layer minzoom and everywhere without a base', () => {
+    expect(osmZoomRange({ base: 'b' }, [base])).toEqual([0, 12])
+    expect(osmZoomRange({ base: null }, [base])).toEqual([0, 24])
+    expect(osmZoomRange({ base: 'x' }, [base])).toEqual([0, 24])
   })
 })

@@ -63,6 +63,20 @@ export function osmVisible(state: Pick<LayerState, 'base'>): boolean {
   return state.base === null
 }
 
+/**
+ * Zoom range of the hardcoded OSM basemap: below a chosen base layer's `minzoom` OSM still shows
+ * (a detailed municipal map drawn at zoom 10 is unreadable), inside the base layer's range it is
+ * hidden by `osmVisible`. Returns [min, max] for `map.setLayerZoomRange`.
+ */
+export function osmZoomRange(
+  state: Pick<LayerState, 'base'>,
+  layers: PublishedLayer[],
+): [number, number] {
+  const base = layers.find((l) => l.id === state.base)
+  if (!base || base.minzoom == null || base.minzoom <= 0) return [0, 24]
+  return [0, base.minzoom]
+}
+
 export function isOn(layer: PublishedLayer, state: LayerState): boolean {
   return layer.slot === 'base' ? state.base === layer.id : state.on.has(layer.id)
 }
