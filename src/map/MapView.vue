@@ -94,8 +94,6 @@ const MAX_PILLS = 30
 /** The plain service circles (no route open) appear from this zoom on (UI-SPEC 3.4). */
 const SERVICES_MIN_ZOOM = 12
 /** Dim overlay of a dark theme above the `base` slot (UI-SPEC 3.4, chapter 8). */
-const DIM_LAYER = 'dim'
-const DIM_COLOR = 'rgba(12,20,28,0.35)'
 
 const container = ref<HTMLDivElement | null>(null)
 let map: MapLibreMap | null = null
@@ -254,8 +252,6 @@ function paint(m: MapLibreMap) {
   m.setPaintProperty('endpoints', 'circle-stroke-color', color)
   m.setPaintProperty('services', 'circle-stroke-color', cssVar('--theme-primary'))
   m.setLayoutProperty('services', 'visibility', servicesVisibility())
-  if (m.getLayer(DIM_LAYER))
-    m.setLayoutProperty(DIM_LAYER, 'visibility', props.theme?.dark ? 'visible' : 'none')
 }
 
 /**
@@ -391,19 +387,9 @@ function addRouteLayers(m: MapLibreMap) {
 }
 
 /**
- * Every catalog layer goes into its slot once, hidden; `applyLayers` switches visibility. The dim
- * overlay sits right above the `base` slot so that raster layers added afterwards land above it.
+ * Every catalog layer goes into its slot once, hidden; `applyLayers` switches visibility.
  */
 function addCatalogLayers(m: MapLibreMap) {
-  m.addLayer(
-    {
-      id: DIM_LAYER,
-      type: 'background',
-      layout: { visibility: 'none' },
-      paint: { 'background-color': DIM_COLOR },
-    },
-    slotAnchor('raster'),
-  )
   const fallback = cssVar('--color-river')
   for (const layer of props.catalog.layers ?? []) {
     const specs = layerSpecs(layer, fallback)

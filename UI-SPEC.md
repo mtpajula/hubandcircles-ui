@@ -240,7 +240,7 @@ on the right third of the frame; the left third is darkened.
   calc(100vw − 28px).
 - While a `base`-slot layer is selected, the hardcoded OSM basemap is hidden (base maps may be
   partly transparent; nothing must bleed through). "Ei pohjakarttaa" shows OSM again.
-- Base layer of a `dark` theme gets a dim overlay `rgba(12,20,28,.35)` above the `base` slot.
+- No dim overlay on the map for `dark` themes (removed 14.9.2026 on review): the base map is shown as is.
 - The picker's "Tasot" list starts with a frontend-only entry "Palvelut reitillä" (checkbox,
   default on, remembered with the layer state as `services`) that toggles the nearby-service
   pills of the open route and the all-services circle layer.
