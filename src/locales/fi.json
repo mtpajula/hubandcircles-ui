@@ -242,5 +242,12 @@
       "hut": "tupa",
       "issue": "ongelmakohta"
     }
+  },
+  "layers": {
+    "title": "Tasot",
+    "basemap": "Pohjakartta",
+    "none": "Ei pohjakarttaa",
+    "overlays": "Tasot",
+    "fetched": "haettu {date}"
   }
 }

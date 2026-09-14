@@ -3,15 +3,35 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ServiceIcon from '../components/ServiceIcon.vue'
 import { presentationOf } from '../data/presentation'
-import type { Theme } from '../types/catalog'
+import { langText } from '../i18n/language'
+import type { PublishedLayer, Theme } from '../types/catalog'
 
 /**
  * "On the map" legend box (UI-SPEC 3.4): selected route, other routes, topo coverage boundary,
- * divider, the theme's priority service categories (the first one labelled as such) and the
- * issue marker. Swatch colors come from the --theme-* variables, so the box follows the theme.
+ * divider, the theme's priority service categories (the first one labelled as such), the issue
+ * marker, and the `legend` entries of the raster layers that are on (chapter 8). Swatch colors
+ * come from the --theme-* variables, so the box follows the theme.
  */
-const props = defineProps<{ theme: Theme | null }>()
+const props = defineProps<{
+  theme: Theme | null
+  /** Visible raster layers; only those with `legend` entries are listed. */
+  layers?: PublishedLayer[]
+  lang?: string
+  defaultLang?: string
+}>()
 const { t, te } = useI18n()
+
+const text = (obj: Record<string, string>) =>
+  langText(obj, props.lang ?? '', props.defaultLang ?? '')
+const rasterLegends = computed(() =>
+  (props.layers ?? [])
+    .filter((l) => l.slot === 'raster' && l.legend?.length)
+    .map((l) => ({
+      id: l.id,
+      name: text(l.name),
+      entries: (l.legend ?? []).map((e, i) => ({ key: i, color: e.color, label: text(e.label) })),
+    })),
+)
 
 const categories = computed(() =>
   presentationOf(props.theme).service_categories_first.map((id, i) => {
@@ -40,6 +60,14 @@ const categories = computed(() =>
         <ServiceIcon class="category" :category="c.id" :size="16" />{{ c.label }}
       </li>
       <li class="row"><span class="issue" aria-hidden="true">!</span>{{ t('map.legendIssue') }}</li>
+      <template v-for="layer in rasterLegends" :key="layer.id">
+        <li class="divider" role="separator"></li>
+        <li class="row layer-name">{{ layer.name }}</li>
+        <li v-for="entry in layer.entries" :key="entry.key" class="row">
+          <span class="swatch raster" :style="{ background: entry.color }" aria-hidden="true"></span
+          >{{ entry.label }}
+        </li>
+      </template>
     </ul>
   </div>
 </template>
@@ -85,6 +113,18 @@ const categories = computed(() =>
 .swatch.other {
   height: 4px;
   background: var(--theme-route-other);
+}
+.swatch.raster {
+  width: 11px;
+  height: 11px;
+  margin: 0 5px 0 6px;
+  border-radius: 2px;
+  border: 1px solid var(--color-border);
+  box-sizing: border-box;
+}
+.layer-name {
+  font: 600 12px/1.4 var(--font-family);
+  color: var(--color-ink);
 }
 .swatch.coverage {
   height: 0;

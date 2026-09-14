@@ -229,6 +229,17 @@ on the right third of the frame; the left third is darkened.
 - Band cursor marker: dark tooltip (`--color-ink`, radius 6, 600 12 white "km 19,4 · sora ·
   hiljainen tie"), 2 px stem 34 h, 14 px white dot with 3 px ink border.
 - Controls top-right: 38×38 white tiles "+", "−", "Tasot" (600 12 river) stacked, radius 8, shadow.
+- Layer picker (opens from the "Tasot" tile, `aria-expanded`, closes on Escape and outside click):
+  popover below the controls (right 14, top 152, width 260, white, border, radius 9, shadow,
+  padding 12/14). Section eyebrows 600 11 uppercase muted: "Pohjakartta" – radio list of the
+  `base`-slot layers available for the theme (ARKKITEHTUURI 5.4 `available()`), plus "Ei
+  pohjakarttaa"; "Tasot" – checkbox list of `raster`/`area`/`points` layers. Row: control + name
+  600 13 `--color-ink`; caption below 400 11 muted "<attribution> · haettu <date>" (date only when
+  `fetched_at`). Initial state per `on_initially()`; choices remembered per theme in
+  `localStorage` (`layers:<theme>`). Empty catalog → tile disabled. Mobile: same popover, width
+  calc(100vw − 28px).
+- Base layer of a `dark` theme gets a dim overlay `rgba(12,20,28,.35)` above the `base` slot.
+- Raster layers with `legend` entries show them in the legend box (swatch 11×11 + label) while on.
 - Legend box bottom-left (left 14, bottom 56, width 236, `#FFFFFFF2`, border, radius 9, padding
   11/13): title "Kartalla" 700 13; rows 400 12: selected route swatch 22×5 theme, other routes
   22×4 lighter, coverage dashed line, divider, service categories from

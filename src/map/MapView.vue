@@ -6,12 +6,21 @@ import {
   type FilterSpecification,
   type GeoJSONSource,
   type IControl,
+  type LayerSpecification,
   type MapMouseEvent,
   type MapOptions,
   type StyleSpecification,
 } from 'maplibre-gl'
-import type { Feature, FeatureCollection } from 'geojson'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import type { Feature, FeatureCollection, Point } from 'geojson'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+  type ComponentPublicInstance,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import PoiPopup from '../components/PoiPopup.vue'
 import ServiceIcon from '../components/ServiceIcon.vue'
@@ -31,9 +40,22 @@ import { langText } from '../i18n/language'
 import { cssVar } from '../theme'
 import type { Catalog, Theme } from '../types/catalog'
 import type { NearbyService } from '../types/route'
+import LayerPicker from './LayerPicker.vue'
 import Legend from './Legend.vue'
 import './worker'
 import { unionBboxes } from './bbox'
+import {
+  availableLayers,
+  initialState,
+  isOn,
+  layerSpecs,
+  mergedAttribution,
+  parseNestedProperties,
+  readState,
+  storageKey,
+  writeState,
+  type LayerState,
+} from './layers'
 import { LAYER_SLOTS, slotAnchor } from './slots'
 
 /**
@@ -66,6 +88,9 @@ const ROUTE_LAYERS = ['overview-casing', 'overview-line'] as const
 const MAX_PILLS = 30
 /** The plain service circles (no route open) appear from this zoom on (UI-SPEC 3.4). */
 const SERVICES_MIN_ZOOM = 12
+/** Dim overlay of a dark theme above the `base` slot (UI-SPEC 3.4, chapter 8). */
+const DIM_LAYER = 'dim'
+const DIM_COLOR = 'rgba(12,20,28,0.35)'
 
 const container = ref<HTMLDivElement | null>(null)
 let map: MapLibreMap | null = null
@@ -80,6 +105,53 @@ const serviceIndex = computed(() => (services.value ? serviceById(services.value
 /** Service point whose popup is open, with its km when it sits on the open route. */
 const selected = shallowRef<{ feature: ServiceFeature; km: number | null } | null>(null)
 
+// ---- catalog layers (ARKKITEHTUURI.md 5.4, chapter 8; UI-SPEC 3.4) ---------------------------
+
+/** Catalog layers offered in this view (`available()`), in catalog order. */
+const catalogLayers = computed(() =>
+  availableLayers(props.catalog.layers ?? [], props.theme?.id ?? null, props.openRoute),
+)
+const layerState = ref<LayerState>({ base: null, on: new Set() })
+const pickerOpen = ref(false)
+const picker = ref<ComponentPublicInstance | null>(null)
+let layersControl: LayersControl | null = null
+/** MapLibre layer ids per catalog layer, filled when the specs are added to the map. */
+const mapLayerIds = new Map<string, string[]>()
+const attribution = computed(() =>
+  mergedAttribution(catalogLayers.value, layerState.value, t('map.attribution')),
+)
+const visibleLayers = computed(() => catalogLayers.value.filter((l) => isOn(l, layerState.value)))
+
+function storage(): Storage | null {
+  try {
+    return window.localStorage
+  } catch {
+    return null
+  }
+}
+/** Remembered choice of this theme when there is one, else the data's initial state. */
+function loadLayerState() {
+  const key = storageKey(props.theme?.id ?? null)
+  layerState.value =
+    readState(storage(), key, catalogLayers.value) ?? initialState(catalogLayers.value, props.theme)
+}
+function onPickerChange(state: LayerState) {
+  layerState.value = state
+  writeState(storage(), storageKey(props.theme?.id ?? null), state)
+}
+function togglePicker(open = !pickerOpen.value) {
+  if (pickerOpen.value === open) return
+  pickerOpen.value = open
+  layersControl?.setExpanded(open)
+  if (!open) layersControl?.focus()
+}
+function onPointerDown(e: PointerEvent) {
+  const target = e.target as Node | null
+  if (!pickerOpen.value || !target) return
+  if (picker.value?.$el?.contains(target) || layersControl?.contains(target)) return
+  togglePicker(false)
+}
+
 const highlightedName = computed(() => {
   const r = props.catalog.routes.find((x) => x.id === highlighted.value)
   return r ? langText(r.name, props.lang, props.catalog.project.default_language) : null
@@ -89,12 +161,19 @@ function animate(): boolean {
   return !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-/** Placeholder "Layers" tile below the zoom buttons; the layer picker arrives with the layer types. */
+/**
+ * "Layers" tile below the zoom buttons, inside the MapLibre control stack (UI-SPEC 3.4). The
+ * picker itself is a Vue component in the frame; the tile only toggles it and carries
+ * `aria-expanded`. Disabled when the catalog offers no layers.
+ */
 class LayersControl implements IControl {
   private element: HTMLDivElement | null = null
+  private button: HTMLButtonElement | null = null
   private readonly label: string
-  constructor(label: string) {
+  private readonly onClick: () => void
+  constructor(label: string, onClick: () => void) {
     this.label = label
+    this.onClick = onClick
   }
   onAdd(): HTMLElement {
     const group = document.createElement('div')
@@ -103,14 +182,30 @@ class LayersControl implements IControl {
     button.type = 'button'
     button.className = 'layers-button'
     button.textContent = this.label
-    button.disabled = true
+    button.setAttribute('aria-expanded', 'false')
+    button.setAttribute('aria-controls', 'layer-picker')
+    button.addEventListener('click', this.onClick)
     group.append(button)
     this.element = group
+    this.button = button
     return group
   }
   onRemove(): void {
     this.element?.remove()
     this.element = null
+    this.button = null
+  }
+  setExpanded(open: boolean): void {
+    this.button?.setAttribute('aria-expanded', String(open))
+  }
+  setDisabled(disabled: boolean): void {
+    if (this.button) this.button.disabled = disabled
+  }
+  focus(): void {
+    this.button?.focus()
+  }
+  contains(node: Node): boolean {
+    return this.element?.contains(node) ?? false
   }
 }
 
@@ -155,6 +250,18 @@ function paint(m: MapLibreMap) {
   m.setPaintProperty('services', 'circle-stroke-color', cssVar('--theme-primary'))
   // With a route open its nearby services are pills; the plain circles would only add noise.
   m.setLayoutProperty('services', 'visibility', props.openRoute ? 'none' : 'visible')
+  if (m.getLayer(DIM_LAYER))
+    m.setLayoutProperty(DIM_LAYER, 'visibility', props.theme?.dark ? 'visible' : 'none')
+}
+
+/** Shows the catalog layers the picker has on; everything else in the catalog stays hidden. */
+function applyLayers(m: MapLibreMap) {
+  const visible = new Set(visibleLayers.value.map((l) => l.id))
+  for (const [id, ids] of mapLayerIds)
+    for (const layerId of ids)
+      if (m.getLayer(layerId))
+        m.setLayoutProperty(layerId, 'visibility', visible.has(id) ? 'visible' : 'none')
+  layersControl?.setDisabled(catalogLayers.value.length === 0)
 }
 
 // ---- style and layers --------------------------------------------------------------------------
@@ -163,13 +270,7 @@ function style(): StyleSpecification {
   return {
     version: 8,
     sources: {
-      basemap: {
-        type: 'raster',
-        tiles: [BASEMAP_URL],
-        tileSize: 256,
-        maxzoom: 19,
-        attribution: t('map.attribution'),
-      },
+      basemap: { type: 'raster', tiles: [BASEMAP_URL], tileSize: 256, maxzoom: 19 },
       overview: { type: 'geojson', data: EMPTY },
       endpoints: { type: 'geojson', data: EMPTY },
       route: { type: 'geojson', data: EMPTY },
@@ -267,6 +368,62 @@ function addRouteLayers(m: MapLibreMap) {
   m.on('mouseleave', 'services', () => (m.getCanvas().style.cursor = ''))
 }
 
+/**
+ * Every catalog layer goes into its slot once, hidden; `applyLayers` switches visibility. The dim
+ * overlay sits right above the `base` slot so that raster layers added afterwards land above it.
+ */
+function addCatalogLayers(m: MapLibreMap) {
+  m.addLayer(
+    {
+      id: DIM_LAYER,
+      type: 'background',
+      layout: { visibility: 'none' },
+      paint: { 'background-color': DIM_COLOR },
+    },
+    slotAnchor('raster'),
+  )
+  const fallback = cssVar('--color-river')
+  for (const layer of props.catalog.layers ?? []) {
+    const specs = layerSpecs(layer, fallback)
+    if (!specs) continue
+    try {
+      m.addSource(specs.sourceId, specs.source)
+      for (const spec of specs.layers) {
+        const hidden: LayerSpecification = {
+          ...spec,
+          layout: { ...spec.layout, visibility: 'none' },
+        }
+        m.addLayer(hidden, slotAnchor(layer.slot))
+        if (layer.type === 'geojson' && layer.slot === 'points') wirePointClicks(m, spec.id)
+      }
+      mapLayerIds.set(
+        layer.id,
+        specs.layers.map((l) => l.id),
+      )
+    } catch (e) {
+      console.warn(`layer ${layer.id} could not be added`, e)
+    }
+  }
+}
+
+/** A click on a catalog points feature opens PoiPopup; the properties are Service-shaped (5.5). */
+function wirePointClicks(m: MapLibreMap, layerId: string) {
+  m.on('click', layerId, (e: MapMouseEvent & { features?: Feature[] }) => {
+    const hit = e.features?.[0]
+    if (!hit || hit.geometry.type !== 'Point') return
+    const properties = parseNestedProperties(hit.properties ?? {}) as ServiceFeature['properties']
+    if (typeof properties.id !== 'string' || typeof properties.category !== 'string') return
+    const feature: ServiceFeature = {
+      type: 'Feature',
+      geometry: hit.geometry as Point,
+      properties,
+    }
+    select(feature, null)
+  })
+  m.on('mouseenter', layerId, () => (m.getCanvas().style.cursor = 'pointer'))
+  m.on('mouseleave', layerId, () => (m.getCanvas().style.cursor = ''))
+}
+
 // ---- markers (UI-SPEC 3.4, 4.3) ----------------------------------------------------------------
 // Plain positioned elements instead of maplibre's Marker: the same `project()` call, far less code.
 
@@ -348,7 +505,9 @@ function select(feature: ServiceFeature, km: number | null) {
   selected.value = selected.value?.feature === feature ? null : { feature, km }
 }
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') selected.value = null
+  if (e.key !== 'Escape') return
+  selected.value = null
+  togglePicker(false)
 }
 
 async function loadServicePoints(m: MapLibreMap) {
@@ -416,7 +575,8 @@ onMounted(() => {
   const m = new MapLibreMap({
     container: container.value,
     style: style(),
-    attributionControl: { compact: false },
+    // The attribution is assembled from the visible layers (UI-SPEC 3.4) and rendered below.
+    attributionControl: false,
     locale: {
       'NavigationControl.ZoomIn': t('map.zoomIn'),
       'NavigationControl.ZoomOut': t('map.zoomOut'),
@@ -424,22 +584,38 @@ onMounted(() => {
     ...initialView(),
   })
   m.addControl(new NavigationControl({ showCompass: false }), 'top-right')
-  m.addControl(new LayersControl(t('map.layers')), 'top-right')
+  layersControl = new LayersControl(t('map.layers'), () => togglePicker())
+  m.addControl(layersControl, 'top-right')
   m.on('move', () => viewVersion.value++)
+  // A tile that fails (an external service refusing the origin, a WMS hiccup) is not a page
+  // error: warn once per source and let the layers below show through.
+  const failed = new Set<string>()
+  m.on('error', (e) => {
+    const sourceId = (e as { sourceId?: string }).sourceId
+    if (!sourceId) return console.error(e.error)
+    if (failed.has(sourceId)) return
+    failed.add(sourceId)
+    console.warn(`tiles of ${sourceId} could not be loaded`, e.error?.message)
+  })
   map = m
   // 'style.load' and not 'load': the latter waits for every basemap tile, which delays the routes.
   ready = new Promise((resolve) => m.once('style.load', () => resolve()))
+  loadLayerState()
   void ready.then(() => {
+    addCatalogLayers(m)
     addRouteLayers(m)
+    applyLayers(m)
     void updateOpenRoute(m, props.openRoute)
     void loadRoutes(m)
     void loadServicePoints(m)
   })
   window.addEventListener('keydown', onKeydown)
+  window.addEventListener('pointerdown', onPointerDown)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown)
+  window.removeEventListener('pointerdown', onPointerDown)
   map?.remove()
   map = null
 })
@@ -461,6 +637,17 @@ watch(
 
 watch(hardestKm, () => {
   if (map) flyToHardest(map)
+})
+
+watch(catalogLayers, () => {
+  togglePicker(false)
+  loadLayerState()
+})
+
+watch(visibleLayers, () => {
+  void ready.then(() => {
+    if (map) applyLayers(map)
+  })
 })
 </script>
 
@@ -517,7 +704,24 @@ watch(hardestKm, () => {
     <p v-if="highlightedName" class="badge" role="status">
       {{ t('map.selected', { name: highlightedName }) }}
     </p>
-    <Legend class="legend" :theme="theme" />
+    <LayerPicker
+      v-if="pickerOpen"
+      ref="picker"
+      class="picker"
+      :layers="catalogLayers"
+      :state="layerState"
+      :lang="lang"
+      :default-lang="catalog.project.default_language"
+      @update:state="onPickerChange"
+    />
+    <Legend
+      class="legend"
+      :theme="theme"
+      :layers="visibleLayers"
+      :lang="lang"
+      :default-lang="catalog.project.default_language"
+    />
+    <p class="attribution">{{ attribution }}</p>
   </div>
 </template>
 
@@ -554,6 +758,26 @@ watch(hardestKm, () => {
   bottom: 56px;
   z-index: 1;
 }
+/* Layer picker popover below the control stack (UI-SPEC 3.4). */
+.picker {
+  position: absolute;
+  top: 152px;
+  right: 14px;
+  z-index: 3;
+}
+/* Attribution bottom-right, assembled from the visible layers (UI-SPEC 3.4). */
+.attribution {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 3px 8px;
+  background: var(--color-white-86);
+  border-radius: var(--radius-badge) 0 0 0;
+  color: var(--color-ink-soft);
+  font: 400 11px/1.4 var(--font-family);
+}
 
 /* MapLibre controls (UI-SPEC 3.4): 38 x 38 white tiles, radius 8, shadow; attribution 400 11. */
 .frame :deep(.maplibregl-ctrl-top-right) {
@@ -577,17 +801,11 @@ watch(hardestKm, () => {
   font: 600 12px/1 var(--font-family);
 }
 .frame :deep(.layers-button:disabled) {
+  color: var(--color-ink-muted);
   cursor: default;
 }
-.frame :deep(.maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib) {
-  background: var(--color-white-86);
-  color: var(--color-ink-soft);
-  font: 400 11px/1.4 var(--font-family);
-  padding: 3px 8px;
-  border-radius: var(--radius-badge) 0 0 0;
-}
-.frame :deep(.maplibregl-ctrl-attrib a) {
-  color: var(--color-ink-soft);
+.frame :deep(.layers-button[aria-expanded='true']) {
+  background: var(--theme-primary-10);
 }
 /* Band cursor (12 px theme dot) and hardest-section marker (UI-SPEC 4.3), anchored at the dot centre. */
 .cursor-marker {

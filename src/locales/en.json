@@ -242,5 +242,12 @@
       "hut": "hut",
       "issue": "issue"
     }
+  },
+  "layers": {
+    "title": "Layers",
+    "basemap": "Base map",
+    "none": "No base map",
+    "overlays": "Layers",
+    "fetched": "fetched {date}"
   }
 }
