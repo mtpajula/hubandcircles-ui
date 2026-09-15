@@ -287,8 +287,15 @@
     "fetched": "haettu {date}"
   },
   "ride": {
-    "soon": "Ajotila tulee pian.",
-    "back": "← Reittikortille"
+    "allowLocation": "Salli sijainti",
+    "recenter": "Keskitä sijaintiin",
+    "stop": "Lopeta",
+    "progress": "/ {km} km ajettu",
+    "offRoute": "Et ole reitillä",
+    "nextService": "seuraava palvelu · {km} km",
+    "locationDenied": "Sijaintia ei saatu. Kartta näyttää reitin silti.",
+    "footnote": "Näyttö pidetään päällä, jos selain tukee sitä. Ei ääniohjeita eikä käännösohjeita.",
+    "map": "Kartta"
   },
   "sheet": {
     "toggle": "Näytä tai pienennä"

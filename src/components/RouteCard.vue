@@ -236,8 +236,16 @@ const blocks = computed(() => {
       <RouterLink class="back" :to="{ name: 'theme', params: { lang, theme: themeId } }">
         {{ backLabel }}
       </RouterLink>
-      <GpxButton :href="gpxHref" :bytes="published?.gpx_bytes" :lang="lang" />
-      <!-- V2: ride mode button -->
+      <div class="header-actions">
+        <GpxButton :href="gpxHref" :bytes="published?.gpx_bytes" :lang="lang" />
+        <RouterLink
+          v-if="published"
+          class="ride-pill"
+          :to="{ name: 'ride', params: { lang, theme: themeId, id: published.id } }"
+        >
+          {{ t('route.ride') }}
+        </RouterLink>
+      </div>
     </div>
     <p v-if="failed" class="status" role="alert">{{ t('error.route') }}</p>
     <p v-else-if="!published" class="status" role="status">{{ t('app.loading') }}</p>
@@ -396,6 +404,25 @@ const blocks = computed(() => {
 }
 .back:hover {
   text-decoration: underline;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-8);
+}
+/* "Ride this route" outline pill (UI-SPEC 4.1): 38 h, theme border and text. */
+.ride-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 16px;
+  border: 1.5px solid var(--theme-primary);
+  border-radius: 19px;
+  box-sizing: border-box;
+  color: var(--theme-accent);
+  font: 600 14px/1 var(--font-family);
+  text-decoration: none;
+  white-space: nowrap;
 }
 .status {
   margin: 0;

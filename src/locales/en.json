@@ -287,8 +287,15 @@
     "fetched": "fetched {date}"
   },
   "ride": {
-    "soon": "Ride mode is coming soon.",
-    "back": "← Back to the route"
+    "allowLocation": "Allow location",
+    "recenter": "Centre on me",
+    "stop": "Stop",
+    "progress": "/ {km} km ridden",
+    "offRoute": "You are off the route",
+    "nextService": "next service · {km} km",
+    "locationDenied": "Location is not available. The map still shows the route.",
+    "footnote": "The screen stays on if the browser supports it. No voice guidance, no turn-by-turn.",
+    "map": "Map"
   },
   "sheet": {
     "toggle": "Show or collapse"

@@ -359,13 +359,13 @@ As §3.4 plus: hardest-section marker (dark tooltip "km 19,4 · vaativin kohta",
   for mtb, width 7 with 14 px night casing). No basemap labels needed.
 - Status bar overlay 44 h `#1C2B3AE6`.
 - Top panel (inset 14, top 56, `--color-night-soft`, border `#2C4056`, radius 12, padding 13/15):
-  route name 700 15 white; "8,4" 700 34 white + "/ 21,3 km ajettu" 400 14 `#9FB6C8`; progress bar
+  route name 700 15 white; "8,4" 700 34 white + "/ 21,3 km ajettu" 400 15 `#9FB6C8`; progress bar
   8 h radius 4 track `#2C4056`, fill theme tint.
 - Position dot 22 px theme tint, 4 px white border, halo `0 0 0 8px rgba(<tint>,.28)`.
 - Bottom stack (inset 14, bottom 20, gap 10): next-service card (34 px category icon, name 700 15
-  white, "seuraava palvelu · 0,3 km" 400 13); primary 56 h pill theme tint bg, `--color-night`
+  white, "seuraava palvelu · 0,3 km" 400 15; the distance is `service.km − ridden km`); primary 56 h pill theme tint bg, `--color-night`
   text 700 17 "Keskitä sijaintiin"; outline 56 h "Lopeta" (border 1.5px `#7A8EA0`, text `#E8EEF2`
-  600 16; "Ilmoita ongelmasta" removed per AP39); footnote 400 11 `#9FB6C8`
+  600 16, translucent night fill behind the outline; "Ilmoita ongelmasta" removed per AP39); footnote 400 15 `#9FB6C8`
   centered "Näyttö pidetään päällä, jos selain tukee sitä. Ei ääniohjeita eikä käännösohjeita."
 - Rules: ≤ 3 buttons, 56 px high; all text ≥ 15 px; geolocation permission requested only here
   (`navigator.geolocation.watchPosition`, high accuracy; an explicit "Salli sijainti" primary

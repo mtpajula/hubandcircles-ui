@@ -46,6 +46,9 @@
   --color-on-night: #e8eef2;
   --color-on-night-muted: #b9c9d6;
   --color-on-night-faint: #9fb6c8;
+  /* 5.2 Ride mode: status bar overlay and outline button border. */
+  --color-night-status: #1c2b3ae6;
+  --color-night-outline: #7a8ea0;
   --color-notice-bg: #fff7e8;
   --color-notice-panel: #fffbf2;
   --color-notice-border: #e8c98a;
