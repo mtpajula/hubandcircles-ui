@@ -21,13 +21,15 @@ import KeyFigures from './KeyFigures.vue'
 import MaintenanceNotice from './MaintenanceNotice.vue'
 import RouteBand from './RouteBand.vue'
 import RouteServices from './RouteServices.vue'
+import ServiceGap from './ServiceGap.vue'
 import ShareBar from './ShareBar.vue'
 
 /**
  * Route card panel (UI-SPEC 4.1–4.2, mobile 5.1). The theme's `presentation` decides the key
  * figures, the band lanes, the hero image and the block order: `hero_image: hardest_section`
  * themes put key figures and the hardest section first, `cover_image` themes the cover and the
- * shares. Under `all` the route's first theme is used. Ride mode is a V2 slot.
+ * shares. Under `all` the route's first theme is used. Below 700 px the order is fixed by
+ * UI-SPEC 5.1: hero, title, key figures, band, longest gap, ride and GPX buttons, then the rest.
  */
 defineOptions({ inheritAttrs: false })
 const props = defineProps<{ catalog: Catalog; theme: Theme | null; lang: string }>()
@@ -91,7 +93,11 @@ const themeChips = computed(() =>
 const seasons = computed(() =>
   (published.value?.seasons ?? []).map((s) => label('season', s)).join(', '),
 )
-const gpxHref = computed(() => (published.value?.gpx ? dataPath(published.value.gpx) : null))
+/** `gpx` is relative to the route folder, like `track` and the media sizes. */
+const gpxHref = computed(() => {
+  const r = published.value
+  return r?.gpx ? dataPath(`routes/${r.id}/${r.gpx}`) : null
+})
 const presentationTheme = computed(() =>
   cardTheme(props.catalog.themes, props.theme, published.value?.themes ?? []),
 )
@@ -193,12 +199,17 @@ const serviceGap = computed(() => {
   return (id && published.value?.longest_service_gap?.[id]) || null
 })
 
-/** Block order per theme (UI-SPEC 4.2 intro); the description sections always come last. */
-const blocks = computed(() =>
-  presentation.value.hero_image === 'cover_image'
-    ? ['cover', 'keyFigures', 'shares', 'band', 'hardest', 'services']
-    : ['keyFigures', 'hardest', 'band', 'shares', 'services'],
-)
+/**
+ * Block order per theme (UI-SPEC 4.2 intro); the description sections come last on desktop.
+ * The mobile card (UI-SPEC 5.1) has one order for every theme, the description after the buttons.
+ */
+const blocks = computed(() => {
+  if (mobile.value)
+    return ['keyFigures', 'band', 'gap', 'actions', 'description', 'hardest', 'shares', 'services']
+  return presentation.value.hero_image === 'cover_image'
+    ? ['cover', 'keyFigures', 'shares', 'band', 'hardest', 'services', 'description']
+    : ['keyFigures', 'hardest', 'band', 'shares', 'services', 'description']
+})
 </script>
 
 <template>
@@ -320,37 +331,47 @@ const blocks = computed(() =>
           :entries="nearby"
           @focus="focusService = $event"
           :categories-first="presentation.service_categories_first"
-          :gap="serviceGap"
+          :gap="mobile ? null : serviceGap"
           :lang="lang"
           :default-lang="defaultLang"
         />
-      </template>
-      <section v-if="published.sections.length" class="block description">
-        <template v-for="(section, i) in published.sections" :key="i">
-          <template v-if="section.type === 'elevation_profile'">
-            <RouteBand
-              v-if="!bandShowsElevation && published.profile.length > 1"
-              v-model:cursor-km="cursorKm"
-              :profile="published.profile"
-              :lanes="['elevation']"
-              :length-km="published.length_km"
+        <ServiceGap v-else-if="block === 'gap'" :gap="serviceGap" :lang="lang" />
+        <!-- Mobile buttons (UI-SPEC 5.1): ride mode primary, GPX outline. -->
+        <div v-else-if="block === 'actions'" class="actions">
+          <RouterLink
+            class="ride"
+            :to="{ name: 'ride', params: { lang, theme: themeId, id: published.id } }"
+          >
+            {{ t('route.ride') }}
+          </RouterLink>
+          <GpxButton :href="gpxHref" :bytes="published.gpx_bytes" :lang="lang" variant="outline" />
+        </div>
+        <section
+          v-else-if="block === 'description' && published.sections.length"
+          class="block description"
+        >
+          <template v-for="(section, i) in published.sections" :key="i">
+            <template v-if="section.type === 'elevation_profile'">
+              <RouteBand
+                v-if="!bandShowsElevation && published.profile.length > 1"
+                v-model:cursor-km="cursorKm"
+                :profile="published.profile"
+                :lanes="['elevation']"
+                :length-km="published.length_km"
+                :lang="lang"
+              />
+            </template>
+            <component
+              :is="sectionComponent(section.type)"
+              v-else-if="sectionComponent(section.type)"
+              :section="section"
+              :route="published"
               :lang="lang"
+              :default-lang="defaultLang"
             />
           </template>
-          <component
-            :is="sectionComponent(section.type)"
-            v-else-if="sectionComponent(section.type)"
-            :section="section"
-            :route="published"
-            :lang="lang"
-            :default-lang="defaultLang"
-          />
-        </template>
-      </section>
-      <!-- V2 (mobile): primary "ride" pill; the GPX pill is filled until then -->
-      <div v-if="mobile" class="mobile-actions">
-        <GpxButton :href="gpxHref" :bytes="published.gpx_bytes" :lang="lang" />
-      </div>
+        </section>
+      </template>
     </article>
   </div>
 </template>
@@ -567,10 +588,22 @@ button.hardest:focus-visible {
     width: 120px;
     height: auto;
   }
-  .mobile-actions {
+  .actions {
     display: flex;
+    flex-direction: column;
+    gap: var(--gap-10);
+    padding-top: var(--gap-4);
+  }
+  .ride {
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding-top: var(--gap-8);
+    height: 52px;
+    border-radius: 26px;
+    background: var(--theme-primary);
+    color: var(--color-white);
+    font: 700 16px/1 var(--font-family);
+    text-decoration: none;
   }
 }
 </style>

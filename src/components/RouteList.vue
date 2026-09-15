@@ -18,6 +18,8 @@ import RouteListCard from './RouteListCard.vue'
 defineOptions({ inheritAttrs: false })
 const props = defineProps<{ catalog: Catalog; theme: Theme | null; lang: string }>()
 const highlighted = defineModel<string | null>('highlightedRoute', { default: null })
+/** Number of routes after filtering, for the mobile sheet's title row (UI-SPEC 5.0). */
+const shownCount = defineModel<number>('shownCount', { default: 0 })
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -35,6 +37,7 @@ const model = computed<FilterModel>({
   set: (next) => void router.replace({ query: filterQuery(next) }),
 })
 const shown = computed(() => applyFilters(routes.value, filters.value, model.value))
+watch(shown, (list) => (shownCount.value = list.length), { immediate: true })
 
 // Set while the highlight comes from this list (hover/focus) so that only a map click scrolls.
 let fromList: string | null = null

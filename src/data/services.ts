@@ -63,3 +63,15 @@ export function nearbyOrdered(
       rank(a.feature.properties.category) - rank(b.feature.properties.category) || a.km - b.km,
   )
 }
+
+/**
+ * Marker shape of a nearby service (UI-SPEC 5.0): on desktop every service gets a pill; on
+ * mobile only the theme's `service_categories_first` categories do, the rest are 10 px dots.
+ */
+export function pillOrDot(
+  service: Pick<ServiceProperties, 'category'>,
+  categoriesFirst: readonly string[],
+  isMobile: boolean,
+): 'pill' | 'dot' {
+  return !isMobile || categoriesFirst.includes(service.category) ? 'pill' : 'dot'
+}

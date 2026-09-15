@@ -161,6 +161,7 @@
   --surface-inset: var(--color-white);
   --surface-placeholder: var(--color-border-soft);
   --surface-overlay: var(--color-white-92);
+  --surface-panel: var(--color-white); /* mobile bottom sheet (UI-SPEC 5.0) */
   --surface-attribution: var(--color-white-86);
   --surface-inverse: var(--color-ink);
   --border-card: var(--color-border);
@@ -179,6 +180,7 @@
   --surface-inset: #22384a;
   --surface-placeholder: #22384a;
   --surface-overlay: #1e3243f2;
+  --surface-panel: #1e3243;
   --surface-attribution: #1e3243db;
   --surface-inverse: var(--color-on-night);
   --border-card: #2c425a;

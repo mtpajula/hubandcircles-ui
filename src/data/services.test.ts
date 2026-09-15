@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { nearbyOrdered, serviceById, type ServiceCollection } from './services'
+import { nearbyOrdered, pillOrDot, serviceById, type ServiceCollection } from './services'
 
 const feature = (id: string, category: string): ServiceCollection['features'][number] => ({
   type: 'Feature',
@@ -65,5 +65,21 @@ describe('nearbyOrdered', () => {
     const [first] = nearbyOrdered(route, byId, ['lean_to'])
     expect(first?.feature.properties.category).toBe('lean_to')
     expect(first?.km).toBe(4)
+  })
+})
+
+describe('pillOrDot', () => {
+  const first = ['water', 'lean_to']
+
+  it('gives every service a pill on desktop', () => {
+    expect(pillOrDot({ category: 'cafe' }, first, false)).toBe('pill')
+    expect(pillOrDot({ category: 'water' }, first, false)).toBe('pill')
+  })
+
+  it('reduces services outside the theme categories to dots on mobile', () => {
+    expect(pillOrDot({ category: 'water' }, first, true)).toBe('pill')
+    expect(pillOrDot({ category: 'lean_to' }, first, true)).toBe('pill')
+    expect(pillOrDot({ category: 'cafe' }, first, true)).toBe('dot')
+    expect(pillOrDot({ category: 'cafe' }, [], true)).toBe('dot')
   })
 })

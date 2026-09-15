@@ -32,7 +32,8 @@
       "surface": "Pinta",
       "traffic": "Liikenne",
       "itrs": "Tekninen vaikeus osuuksina"
-    }
+    },
+    "ride": "Aja reittiä"
   },
   "season": {
     "summer": "Kesä",
@@ -284,5 +285,12 @@
     "overlays": "Tasot",
     "services": "Palvelut reitillä",
     "fetched": "haettu {date}"
+  },
+  "ride": {
+    "soon": "Ajotila tulee pian.",
+    "back": "← Reittikortille"
+  },
+  "sheet": {
+    "toggle": "Näytä tai pienennä"
   }
 }

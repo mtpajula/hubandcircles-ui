@@ -325,6 +325,24 @@ As §3.4 plus: hardest-section marker (dark tooltip "km 19,4 · vaativin kohta",
 
 ## 5. Mobile route card and ride mode – frame 3e (390 × 844)
 
+### 5.0 Map page below 700 px – bottom sheet (added 15.9.2026 after the mobile review)
+
+- The map fills the viewport below the 56 px header; the sidebar becomes a **bottom sheet** over
+  the map (white / `--surface-panel`, radius 16 16 0 0, shadow, drag handle 36×4 `--color-border`
+  centred in a 24 px grab area). Two states: **open** (top at 45 dvh; the sheet scrolls inside)
+  and **peek** (top at calc(100dvh − 64px): only the handle and the title row are visible – theme
+  name + "3 / 5 reittiä", or the route title). Drag the handle or tap it to toggle; keyboard:
+  the handle is a `button` with `aria-expanded`. State per page kept in the route query
+  (`?sheet=peek`) so back/forward restores it. Default: list page open, route page open.
+- A floating pill "Kartta koko näytölle" / "Näytä lista" is not needed: the handle is the control.
+- Map controls (+ − Tasot) stay top-right and are never covered; the layer picker opens as a
+  full-width sheet from the top (below the controls) on mobile.
+- Legend box hidden below 700 px (already); attribution stays.
+- Service pills on mobile: only services in the theme's `service_categories_first` categories
+  get a pill; the rest are 10 px dots (theme stroke) – tapping a dot opens the popup. The picker's
+  "Palvelut reitillä" hides both.
+- The band cursor, hardest marker and popups work as on desktop.
+
 ### 5.1 Route card
 
 - Hero image 176 h (hardest section or cover per theme) with floating "← Maasto" white pill
@@ -332,7 +350,8 @@ As §3.4 plus: hardest-section marker (dark tooltip "km 19,4 · vaativin kohta",
 - Body padding 14/16 gap 13: title 700 21/1.2; `KeyFigures` 2×2 tiles (padding 9/11, value 700
   19); `RouteBand` compact (elevation 68 h, lanes 14 h, axis ends only); longest-gap box; pushed
   to bottom: primary pill 52 h filled theme "Aja reittiä", outline pill 52 h "Lataa GPX".
-- Below 700 px the map is a 45dvh strip above the panel (existing `MapView` min-height).
+- Below 700 px the card is the bottom sheet body (§5.0); the hero image is the first block and
+  the description/gallery/services follow the buttons in the scroll.
 
 ### 5.2 Ride mode (`…/ride`)
 
@@ -345,11 +364,16 @@ As §3.4 plus: hardest-section marker (dark tooltip "km 19,4 · vaativin kohta",
 - Position dot 22 px theme tint, 4 px white border, halo `0 0 0 8px rgba(<tint>,.28)`.
 - Bottom stack (inset 14, bottom 20, gap 10): next-service card (34 px category icon, name 700 15
   white, "seuraava palvelu · 0,3 km" 400 13); primary 56 h pill theme tint bg, `--color-night`
-  text 700 17 "Keskitä sijaintiin"; row: outline 56 h "Ilmoita ongelmasta" (flex 1) + outline 56 h
-  92 wide "Lopeta" (border 1.5px `#7A8EA0`, text `#E8EEF2` 600 16); footnote 400 11 `#9FB6C8`
+  text 700 17 "Keskitä sijaintiin"; outline 56 h "Lopeta" (border 1.5px `#7A8EA0`, text `#E8EEF2`
+  600 16; "Ilmoita ongelmasta" removed per AP39); footnote 400 11 `#9FB6C8`
   centered "Näyttö pidetään päällä, jos selain tukee sitä. Ei ääniohjeita eikä käännösohjeita."
-- Rules: ≤ 3 buttons, 56 px high; all text ≥ 15 px; geolocation permission requested only here;
-  distance ridden = nearest index in `track.properties.km`; Screen Wake Lock if available.
+- Rules: ≤ 3 buttons, 56 px high; all text ≥ 15 px; geolocation permission requested only here
+  (`navigator.geolocation.watchPosition`, high accuracy; an explicit "Salli sijainti" primary
+  button appears first – iOS grants the permission only from a user gesture; denied → message
+  and the map still shows the route); distance ridden = nearest index in `track.properties.km`
+  (P3, no computation beyond the nearest coordinate); Screen Wake Lock if available; the position
+  never leaves the browser (chapter 13). Basemap: OSM dimmed with a `--color-night` overlay at
+  .55 so the route tint stands out; the theme's base layer is not used here.
 
 ## 6. Component catalogue
 

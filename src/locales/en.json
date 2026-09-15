@@ -32,7 +32,8 @@
       "surface": "Surface",
       "traffic": "Traffic",
       "itrs": "Technical difficulty by section"
-    }
+    },
+    "ride": "Ride the route"
   },
   "season": {
     "summer": "Summer",
@@ -284,5 +285,12 @@
     "overlays": "Layers",
     "services": "Services on the route",
     "fetched": "fetched {date}"
+  },
+  "ride": {
+    "soon": "Ride mode is coming soon.",
+    "back": "← Back to the route"
+  },
+  "sheet": {
+    "toggle": "Show or collapse"
   }
 }

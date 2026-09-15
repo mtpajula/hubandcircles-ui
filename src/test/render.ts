@@ -8,6 +8,7 @@ const Stub = { render: () => null }
 const ROUTES = [
   { path: '/', name: 'landing', component: Stub },
   { path: '/:lang/:page(accessibility|privacy)', name: 'statement', component: Stub },
+  { path: '/:lang/:theme/route/:id/ride', name: 'ride', component: Stub },
   {
     path: '/:lang/:theme',
     component: Stub,

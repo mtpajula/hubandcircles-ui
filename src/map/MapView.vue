@@ -24,12 +24,15 @@ import {
 import { useI18n } from 'vue-i18n'
 import PoiPopup from '../components/PoiPopup.vue'
 import ServiceIcon from '../components/ServiceIcon.vue'
+import { useMediaQuery } from '../composables/mediaQuery'
 import { BASEMAP_URL } from '../config'
 import { mixWithWhite } from '../data/color'
 import { loadOverview, routeEndpoints } from '../data/overview'
 import { dataPath } from '../data/paths'
+import { cardTheme, presentationOf } from '../data/presentation'
 import {
   loadServices,
+  pillOrDot,
   serviceById,
   type ServiceCollection,
   type ServiceFeature,
@@ -73,6 +76,8 @@ const props = defineProps<{
   lang: string
   /** `nearby_services` of the open route (route.json), drawn as service pills (UI-SPEC 3.4). */
   nearbyServices?: NearbyService[]
+  /** Pixels at the bottom hidden under the mobile sheet (UI-SPEC 5.0): map padding for `fitBounds`. */
+  insetBottom?: number
 }>()
 
 /** Highlighted route: set from the list (hover/focus) and from a click on a line. */
@@ -85,6 +90,7 @@ const hardestKm = defineModel<number | null>('hardestKm', { default: null })
 const focusService = defineModel<string | null>('focusService', { default: null })
 
 const { t, te } = useI18n()
+const mobile = useMediaQuery('(max-width: 699px)')
 
 const ROVANIEMI: [number, number] = [25.72, 66.5]
 const EMPTY: FeatureCollection = { type: 'FeatureCollection', features: [] }
@@ -162,6 +168,14 @@ const highlightedName = computed(() => {
 
 function animate(): boolean {
   return !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+/** Fit padding 40 (UI-SPEC 4.3) plus the part of the map under the mobile sheet (UI-SPEC 5.0). */
+function fitPadding() {
+  return { top: 40, right: 40, bottom: 40 + (props.insetBottom ?? 0), left: 40 }
+}
+/** Fly target offset that keeps the point centred in the visible part of the map. */
+function flyOffset(): [number, number] {
+  return [0, -(props.insetBottom ?? 0) / 2]
 }
 
 /**
@@ -502,11 +516,21 @@ function project(items: { feature: ServiceFeature; km: number | null }[]): Servi
     return { feature, km, x, y }
   })
 }
-const pills = computed(() =>
+/** Categories that keep a pill on mobile (UI-SPEC 5.0): the presented theme's first categories. */
+const categoriesFirst = computed(() => {
+  const themes = props.catalog.routes.find((r) => r.id === props.openRoute)?.themes ?? []
+  return presentationOf(cardTheme(props.catalog.themes, props.theme, themes))
+    .service_categories_first
+})
+const serviceMarkers = computed(() =>
   layerState.value.services
     ? project(nearbyFeatures.value.filter((x) => x.feature.properties.category !== 'issue'))
     : [],
 )
+const shape = (marker: ServiceMarker) =>
+  pillOrDot(marker.feature.properties, categoriesFirst.value, mobile.value)
+const pills = computed(() => serviceMarkers.value.filter((m) => shape(m) === 'pill'))
+const dots = computed(() => serviceMarkers.value.filter((m) => shape(m) === 'dot'))
 const issues = computed(() => project(issueFeatures.value))
 const popupPx = computed(() => project(selected.value ? [selected.value] : [])[0] ?? null)
 
@@ -550,13 +574,19 @@ function flyToService(m: MapLibreMap, id: string | null) {
   const feature = id === null ? undefined : serviceIndex.value?.get(id)
   if (!feature) return
   const [lng, lat] = feature.geometry.coordinates
-  m.flyTo({ center: [lng!, lat!], zoom: 15, animate: animate() })
+  m.flyTo({ center: [lng!, lat!], zoom: 15, offset: flyOffset(), animate: animate() })
   focusService.value = null
 }
 
 function flyToHardest(m: MapLibreMap) {
   const point = track && hardestKm.value !== null ? pointAtKm(track, hardestKm.value) : null
-  if (point) m.flyTo({ center: point, zoom: Math.max(m.getZoom(), 14), animate: animate() })
+  if (point)
+    m.flyTo({
+      center: point,
+      zoom: Math.max(m.getZoom(), 14),
+      offset: flyOffset(),
+      animate: animate(),
+    })
 }
 
 async function loadRoutes(m: MapLibreMap) {
@@ -573,7 +603,7 @@ function initialView(): Partial<MapOptions> {
   // Project area from the catalog; the union of route bboxes is the fallback for old data.
   const bbox = props.catalog.project.area ?? unionBboxes(props.catalog.routes.map((r) => r.bbox))
   return bbox
-    ? { bounds: bbox, fitBoundsOptions: { padding: 40 } }
+    ? { bounds: bbox, fitBoundsOptions: { padding: fitPadding() } }
     : { center: ROVANIEMI, zoom: 10 }
 }
 
@@ -588,7 +618,7 @@ async function updateOpenRoute(m: MapLibreMap, id: string | null) {
     return
   }
   const bbox = props.catalog.routes.find((r) => r.id === id)?.bbox
-  if (bbox) m.fitBounds(bbox, { padding: 40, animate: animate() })
+  if (bbox) m.fitBounds(bbox, { padding: fitPadding(), animate: animate() })
   try {
     const feature = await loadTrack(dataPath(`routes/${id}/track.geojson`))
     if (id !== props.openRoute) return
@@ -718,6 +748,17 @@ watch(layerState, () => {
       <span v-if="marker.km !== null" class="pill-km">{{ pillKm(marker.km) }}</span>
     </button>
     <button
+      v-for="marker in dots"
+      :key="marker.feature.properties.id"
+      type="button"
+      class="service-dot"
+      :style="translate(marker)"
+      :aria-label="pillLabel(marker)"
+      @click="select(marker.feature, marker.km)"
+    >
+      <span class="dot" aria-hidden="true"></span>
+    </button>
+    <button
       v-for="marker in issues"
       :key="marker.feature.properties.id"
       type="button"
@@ -759,7 +800,8 @@ watch(layerState, () => {
       :lang="lang"
       :default-lang="catalog.project.default_language"
     />
-    <p class="attribution">{{ attribution }}</p>
+    <!-- Above the mobile sheet (UI-SPEC 5.0: the attribution stays visible). -->
+    <p class="attribution" :style="{ bottom: `${insetBottom ?? 0}px` }">{{ attribution }}</p>
   </div>
 </template>
 
@@ -934,6 +976,31 @@ watch(layerState, () => {
   line-height: 1;
   color: var(--color-ink-muted);
 }
+/* Service dot (UI-SPEC 5.0, mobile): 10 px theme-stroked dot inside a 44 px touch target. */
+.service-dot {
+  position: absolute;
+  top: -22px;
+  left: -22px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: var(--color-white);
+  border: 2px solid var(--theme-primary);
+  box-shadow: var(--shadow-control);
+}
 /* Issue marker: 30 px white circle, midnight-sun ring, "!" in gravel (UI-SPEC 3.4). */
 .issue-marker {
   position: absolute;
@@ -969,6 +1036,17 @@ watch(layerState, () => {
 @media (max-width: 699px) {
   .legend {
     display: none;
+  }
+  /* Layer picker as a full-width sheet below the controls (UI-SPEC 5.0), scrolling if tall. */
+  .frame .picker {
+    right: 0;
+    left: 0;
+    width: auto;
+    max-width: none;
+    max-height: calc(100% - 152px - 14px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 0 0 12px 12px;
   }
 }
 </style>

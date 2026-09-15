@@ -7,6 +7,7 @@ import { availableLanguages } from '../i18n'
 import { resolveLanguage } from '../i18n/language'
 import LandingPage from '../pages/LandingPage.vue'
 import MapPage from '../pages/MapPage.vue'
+import RidePage from '../pages/RidePage.vue'
 import StatementPage, { STATEMENT_PAGES } from '../pages/StatementPage.vue'
 
 function param(value: string | string[] | undefined): string | undefined {
@@ -15,9 +16,10 @@ function param(value: string | string[] | undefined): string | undefined {
 
 /**
  * Hash routes (ARKKITEHTUURI.md 4.4): `#/` landing, `#/<lang>/<theme>/` map, `#/<lang>/all/` map
- * with every route, `#/<lang>/<theme>/route/<id>` route card, `#/<lang>/accessibility` and
- * `#/<lang>/privacy` statement pages (UI-SPEC 2.1). The pages receive the loaded catalog as a
- * prop from App.vue. Exported for the tests, which run them in a memory history.
+ * with every route, `#/<lang>/<theme>/route/<id>` route card, `…/route/<id>/ride` ride mode
+ * (placeholder until U9b), `#/<lang>/accessibility` and `#/<lang>/privacy` statement pages
+ * (UI-SPEC 2.1). The pages receive the loaded catalog as a prop from App.vue. Exported for the
+ * tests, which run them in a memory history.
  */
 export const routes: RouteRecordRaw[] = [
   { path: '/', name: 'landing', component: LandingPage },
@@ -27,6 +29,7 @@ export const routes: RouteRecordRaw[] = [
     component: StatementPage,
     props: true,
   },
+  { path: '/:lang/:theme/route/:id/ride', name: 'ride', component: RidePage },
   {
     path: '/:lang/:theme',
     component: MapPage,
