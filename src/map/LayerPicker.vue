@@ -113,11 +113,11 @@ function toggle(id: string, on: boolean) {
   max-width: calc(100vw - 28px);
   box-sizing: border-box;
   padding: 12px 14px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-panel);
   box-shadow: var(--shadow-card);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .group {
   display: flex;
@@ -134,7 +134,7 @@ function toggle(id: string, on: boolean) {
   font: var(--text-eyebrow);
   letter-spacing: var(--text-eyebrow-spacing);
   text-transform: uppercase;
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .row {
   display: flex;
@@ -155,11 +155,11 @@ function toggle(id: string, on: boolean) {
 }
 .name {
   font: 600 13px/1.25 var(--font-family);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .caption {
   font: var(--text-caption);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
   overflow-wrap: anywhere;
 }
 </style>

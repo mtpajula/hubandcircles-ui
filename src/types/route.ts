@@ -14,6 +14,7 @@ export type Bbox = [number, number, number, number]
 export type CoverImage = string | null
 export type Difficulty = ('easy' | 'moderate' | 'demanding') | null
 export type DominantSurface = string | null
+export type ElevationSource = ('gpx' | 'geojson' | 'mml_dem') | null
 export type Gpx = string | null
 export type GpxBytes = number | null
 export type HardestImage = string | null
@@ -99,6 +100,7 @@ export interface PublishedRoute {
   cover_image?: CoverImage
   difficulty?: Difficulty
   dominant_surface?: DominantSurface
+  elevation_source?: ElevationSource
   gpx?: Gpx
   gpx_bytes?: GpxBytes
   hardest_image?: HardestImage

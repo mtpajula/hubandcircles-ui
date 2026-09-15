@@ -83,10 +83,10 @@ const categories = computed(() =>
   max-width: calc(100vw - 28px);
   box-sizing: border-box;
   padding: 11px 13px;
-  background: var(--color-white-92);
-  border: 1px solid var(--color-border);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-panel);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .title {
   margin: 0 0 var(--gap-8);
@@ -104,7 +104,7 @@ const categories = computed(() =>
   align-items: center;
   gap: var(--gap-9);
   font: var(--text-caption-lg);
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
 }
 .swatch {
   flex: none;
@@ -124,22 +124,22 @@ const categories = computed(() =>
   height: 11px;
   margin: 0 5px 0 6px;
   border-radius: 2px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   box-sizing: border-box;
 }
 .layer-name {
   font: 600 12px/1.4 var(--font-family);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .swatch.coverage {
   height: 0;
-  border-top: 1.5px dashed var(--color-ink);
+  border-top: 1.5px dashed var(--text-strong);
   opacity: 0.35;
   border-radius: 0;
 }
 .divider {
   height: 0;
-  border-top: 1px solid var(--color-border-soft);
+  border-top: 1px solid var(--border-hairline);
   margin: var(--gap-4) 0;
 }
 .category {

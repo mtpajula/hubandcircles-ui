@@ -43,7 +43,7 @@ const embed = computed(() => embedUrl(props.section.url))
   font: var(--text-eyebrow);
   letter-spacing: var(--text-eyebrow-spacing);
   text-transform: uppercase;
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .player {
   display: block;
@@ -51,7 +51,7 @@ const embed = computed(() => embedUrl(props.section.url))
   aspect-ratio: 16 / 9;
   border: 0;
   border-radius: var(--radius-panel);
-  background: var(--color-border-soft);
+  background: var(--surface-placeholder);
 }
 .link {
   font: 600 14px/1.2 var(--font-family);

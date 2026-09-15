@@ -95,11 +95,11 @@ const source = computed(() => {
   max-width: calc(100vw - 28px);
   box-sizing: border-box;
   padding: 11px 13px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-panel);
   box-shadow: var(--shadow-card);
-  color: var(--color-ink);
+  color: var(--text-strong);
   text-align: left;
 }
 .head {
@@ -120,7 +120,7 @@ const source = computed(() => {
 }
 .subtitle {
   font: var(--text-caption-lg);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .close {
   flex: none;
@@ -131,17 +131,17 @@ const source = computed(() => {
   border: 0;
   border-radius: 50%;
   background: none;
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
   font: 400 20px/1 var(--font-family);
   cursor: pointer;
 }
 .close:hover {
-  background: var(--color-snow);
+  background: var(--surface-inset);
 }
 .description {
   margin: 0;
   font: 400 13px/1.5 var(--font-family);
-  color: var(--color-ink-prose);
+  color: var(--text-prose);
 }
 .details {
   display: grid;
@@ -151,16 +151,16 @@ const source = computed(() => {
   font: var(--text-caption-lg);
 }
 .details dt {
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .details dd {
   margin: 0;
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
 }
 .source {
   margin: 0;
   font: var(--text-caption);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .link {
   font: 600 12px/1.2 var(--font-family);

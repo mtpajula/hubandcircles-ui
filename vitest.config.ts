@@ -6,5 +6,7 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
     environment: 'node',
+    // Vitest stubs CSS imports (also `?raw`) unless included; the token test reads the real file.
+    css: { include: [/tokens\.css/] },
   },
 })

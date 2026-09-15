@@ -166,8 +166,8 @@ const excluded = computed(() => props.total - props.shown)
   flex-direction: column;
   gap: var(--gap-10);
   padding: 15px 18px 13px;
-  background: var(--color-snow);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--surface-page);
+  border-bottom: 1px solid var(--border-card);
 }
 .header {
   display: flex;
@@ -178,11 +178,11 @@ const excluded = computed(() => props.total - props.shown)
 .theme-name {
   margin: 0;
   font: 700 17px/1.2 var(--font-family);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .count {
   font: 400 13px/1.2 var(--font-family);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
   white-space: nowrap;
 }
 .group {
@@ -197,7 +197,7 @@ const excluded = computed(() => props.total - props.shown)
   font: var(--text-eyebrow);
   letter-spacing: var(--text-eyebrow-spacing);
   text-transform: uppercase;
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .chips {
   display: flex;
@@ -210,10 +210,10 @@ const excluded = computed(() => props.total - props.shown)
   align-items: center;
   gap: var(--gap-6);
   padding: 6px 11px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-chip);
-  background: var(--color-white);
-  color: var(--color-ink-soft);
+  background: var(--surface-inset);
+  color: var(--text-soft);
   font: 600 12px/1.2 var(--font-family);
   cursor: pointer;
 }
@@ -239,10 +239,13 @@ const excluded = computed(() => props.total - props.shown)
   font: 700 12px/1 var(--font-family);
   cursor: pointer;
 }
+[data-theme-dark] .level {
+  border-color: var(--border-card);
+}
 .level.outlined {
-  background: var(--color-white);
-  border-color: var(--color-border);
-  color: var(--color-ink-muted);
+  background: var(--surface-inset);
+  border-color: var(--border-card);
+  color: var(--text-muted);
 }
 .slider {
   display: flex;
@@ -259,7 +262,7 @@ const excluded = computed(() => props.total - props.shown)
   background: linear-gradient(
     to right,
     var(--traffic-separated) var(--fill),
-    var(--color-border) var(--fill)
+    var(--border-card) var(--fill)
   );
   cursor: pointer;
 }
@@ -283,15 +286,15 @@ const excluded = computed(() => props.total - props.shown)
   min-width: 40px;
   text-align: right;
   font: 700 13px/1.2 var(--font-family);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .info {
   margin: 0;
   padding: 8px 10px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-box);
-  background: var(--color-white);
+  background: var(--surface-inset);
   font: 400 12px/1.45 var(--font-family);
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
 }
 </style>

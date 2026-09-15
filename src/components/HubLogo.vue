@@ -70,10 +70,10 @@ function ringOpacity(selected: boolean): number {
   flex: none;
 }
 .outer {
-  stroke: var(--color-ink);
+  stroke: var(--text-strong);
 }
 .hub {
-  fill: var(--color-ink);
+  fill: var(--text-strong);
 }
 .dark .outer {
   stroke: var(--color-white);

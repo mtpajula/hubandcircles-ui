@@ -6,7 +6,8 @@
     "map": "Kartta"
   },
   "nav": {
-    "backToTheme": "← {name} · {n} reitti | ← {name} · {n} reittiä"
+    "backToTheme": "← {name} · {n} reitti | ← {name} · {n} reittiä",
+    "home": "Etusivulle"
   },
   "lang": {
     "select": "Kieli",
@@ -64,8 +65,7 @@
     "legendPrimary": "teeman ensisijainen"
   },
   "report": {
-    "button": "Ilmoita ongelmasta",
-    "requiresGithub": "vaatii GitHub-tunnuksen"
+    "button": "Ilmoita ongelmasta"
   },
   "landing": {
     "title": "Rovaniemen pyöräreitit yhdellä kartalla",
@@ -90,8 +90,8 @@
     "promise2Text": "Vaativuus kerrotaan sanoin ja ITRS-luokituksena, ei pelkkänä värinä. Nousut ja pituudet tulevat mitatusta jäljestä.",
     "promise3Title": "Pinta ja liikenne",
     "promise3Text": "Reittikortti näyttää, kuinka paljon on asfalttia, soraa ja polkua, ja missä ajetaan autoliikenteen seassa.",
-    "promise4Title": "Kerro korjauksista",
-    "promise4Text": "Kaatunut puu, uusi aita tai väärä pinta? Jokaisella reitillä on painike, jolla korjauksen voi ilmoittaa.",
+    "promise4Title": "Lähteet näkyvissä",
+    "promise4Text": "Jokaisen karttatason ja palvelun kohdalla lukee, mistä tieto on peräisin ja milloin se on haettu.",
     "sourcesTitle": "Mistä tiedot tulevat",
     "sourcesText": "Kartta-aineisto ja reittien pintatiedot tulevat avoimista lähteistä. Reittien jäljet ja kuvaukset ovat harrastajien omia. Lähteet ja niiden hakupäivät:",
     "source1": "© OpenStreetMap-tekijät (ODbL)",
@@ -104,6 +104,40 @@
     "footerTitle": "Harrastajien kokoama sivusto",
     "footerNote": "Ei kunnan palvelu. Reitit ajetaan omalla vastuulla.",
     "readMore": "Lue lisää ↓"
+  },
+  "footer": {
+    "accessibility": "Saavutettavuusseloste",
+    "privacy": "Tietosuojaseloste",
+    "copyright": "© {year} {name}"
+  },
+  "page": {
+    "accessibility": {
+      "title": "Saavutettavuusseloste",
+      "intro": "Napa ja piirit on harrastajien ylläpitämä sivusto Rovaniemen seudun pyöräreiteistä. Tavoitteena on täyttää WCAG 2.1 -ohjeistuksen AA-taso. Tämä seloste on laadittu 15.9.2026 sivuston omana arviona.",
+      "statusTitle": "Saavutettavuuden tila",
+      "status": "Sivusto täyttää vaatimukset suurimmaksi osaksi. Tekstit, painikkeet, lomakkeet ja reittikortit toimivat näppäimistöllä ja ruudunlukijalla, värit eivät ole ainoa tiedon kantaja (ITRS-tasoissa on aina numero ja nimi), ja liike voidaan estää käyttöjärjestelmän asetuksella (prefers-reduced-motion).",
+      "issuesTitle": "Tunnetut puutteet",
+      "issues": [
+        "Kartta on WebGL-piirto, jota ei voi selata ruudunlukijalla. Reitin tiedot, palvelut ja korkeusprofiili ovat saatavilla tekstinä reittikortissa, ja GPX-tiedoston voi ladata.",
+        "Korkeusprofiilin nauhan kohdistinta liikutetaan nuolinäppäimillä; arvot ilmoitetaan aria-attribuutteina, mutta niitä ei lueta ääneen jokaisella siirrolla.",
+        "Aloitussivun videossa ei ole ääntä eikä tekstitystä; sen sisältö on koristeellinen."
+      ],
+      "feedbackTitle": "Palaute",
+      "feedback": "Jos huomaat puutteen, kerro siitä sivuston GitHub-arkistossa. Sivustolla ei ole erillistä palautelomaketta.",
+      "repoLabel": "Sivuston lähdedata GitHubissa"
+    },
+    "privacy": {
+      "title": "Tietosuojaseloste",
+      "intro": "Napa ja piirit ei kerää henkilötietoja. Sivustolla ei ole käyttäjätilejä, lomakkeita, evästeitä eikä kävijäseurantaa.",
+      "storageTitle": "Selaimeen tallennettavat tiedot",
+      "storage": "Sivusto tallentaa selaimesi paikalliseen muistiin (localStorage) vain käyttöasetuksia: valitun teeman ja kielen, karttatasojen valinnat sekä sen, oletko pysäyttänyt aloitussivun videon. Tietoja ei lähetetä mihinkään, ja ne poistuvat, kun tyhjennät selaimen sivustotiedot.",
+      "thirdTitle": "Ulkopuoliset palvelut",
+      "third": "Kartta hakee karttalaatat suoraan palveluntarjoajilta, jolloin niiden palvelimet näkevät IP-osoitteesi ja pyydetyt karttaruudut: OpenStreetMap-säätiö (taustakartta), Rovaniemen kaupunki (opas-, pohja- ja ilmakuvakartat) sekä sivuston oma julkaisu GitHub Pagesissa (Maanmittauslaitoksen maastokartan ruudut, reitit ja kuvat). Sivusto ei käytä analytiikkaa eikä mainosverkkoja.",
+      "hostingTitle": "Julkaisualusta",
+      "hosting": "Sivusto julkaistaan GitHub Pages -palvelussa. GitHub voi kerätä palvelinlokiin IP-osoitteita oman tietosuojakäytäntönsä mukaisesti.",
+      "contactTitle": "Yhteystiedot",
+      "contact": "Sivuston ylläpitäjä on yksityishenkilö. Kysymykset voi esittää sivuston GitHub-arkistossa."
+    }
   },
   "maintenance": {
     "notice": "Ei kunnan ylläpitämä",

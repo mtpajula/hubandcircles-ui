@@ -42,22 +42,22 @@ function target(lang: string): RouteLocationRaw {
   height: 36px;
   padding: 2px;
   box-sizing: border-box;
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--border-card);
   border-radius: 18px;
-  background: var(--color-white);
+  background: var(--surface-card);
 }
 .option {
   display: inline-flex;
   align-items: center;
   padding: 0 11px;
   border-radius: 16px;
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
   font: var(--text-button);
   text-decoration: none;
 }
 .option[aria-current='page'] {
-  background: var(--color-ink);
-  color: var(--color-white);
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
   font: var(--text-button-strong);
 }
 

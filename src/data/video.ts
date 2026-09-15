@@ -1,8 +1,9 @@
 /** Viewports narrower than this get the poster only (UI-SPEC 2.2, 2.3). */
 export const VIDEO_MIN_WIDTH = 700
 
-/** Connection types on which the hero video is not worth its bytes (UI-SPEC 2.3). */
-const SLOW_CONNECTIONS = ['slow-2g', '2g', '3g']
+/** Connection types on which the hero video is not worth its bytes (UI-SPEC 2.3). `3g` is not
+ * listed: wired networks are often misreported as 3g, and the video only preloads its metadata. */
+const SLOW_CONNECTIONS = ['slow-2g', '2g']
 
 export interface VideoConditions {
   width: number
@@ -13,7 +14,7 @@ export interface VideoConditions {
 
 /**
  * Whether the hero `<video>` is rendered at all. Anything else shows the poster, so no video bytes
- * are fetched on phones, with reduced motion, or on slow or metered connections.
+ * are fetched on phones, with reduced motion, or on metered or very slow connections.
  */
 export function shouldLoadVideo(c: VideoConditions): boolean {
   if (c.width < VIDEO_MIN_WIDTH) return false

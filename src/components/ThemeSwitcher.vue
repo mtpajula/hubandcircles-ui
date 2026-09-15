@@ -8,7 +8,7 @@ import HubLogo from './HubLogo.vue'
 
 /**
  * Theme pills (UI-SPEC 3.1). Each pill is a link to `#/<lang>/<theme>/`, so `aria-current`
- * marks the active one. Below 700 px the row collapses to the logo, which opens a plain list.
+ * marks the active one; it is filled with the theme color (UI-SPEC 1.1). Below 700 px the row collapses to the logo, which opens a plain list.
  * `current` is a theme id or `all` (nothing active).
  */
 const props = defineProps<{
@@ -103,10 +103,10 @@ ul {
   height: 36px;
   padding: 0 13px 0 10px;
   box-sizing: border-box;
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--border-card);
   border-radius: 18px;
-  background: var(--color-white);
-  color: var(--color-ink-soft);
+  background: var(--surface-card);
+  color: var(--text-soft);
   font: var(--text-button);
   text-decoration: none;
   white-space: nowrap;
@@ -118,9 +118,12 @@ ul {
   border-color: var(--pill-color);
 }
 .pill.active {
-  background: var(--theme-primary-10);
+  background: var(--pill-color);
   border-color: var(--pill-color);
-  color: var(--pill-color);
+  color: var(--color-white);
+}
+.pill.active .dot {
+  background: var(--color-white);
 }
 .dot {
   width: 10px;
@@ -150,8 +153,8 @@ ul {
   z-index: 20;
   min-width: 220px;
   padding: var(--gap-6);
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-panel);
   box-shadow: var(--shadow-card);
 }
@@ -162,13 +165,16 @@ ul {
   min-height: 44px;
   padding: 0 var(--gap-12);
   border-radius: var(--radius-box);
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
   font: var(--text-button);
   text-decoration: none;
 }
 .row[aria-current='page'] {
-  background: var(--theme-primary-10);
-  color: var(--pill-color);
+  background: var(--pill-color);
+  color: var(--color-white);
+}
+.row[aria-current='page'] .dot {
+  background: var(--color-white);
 }
 @media (max-width: 699px) {
   .pills {

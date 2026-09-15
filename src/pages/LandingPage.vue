@@ -45,8 +45,10 @@ function countOf(themeId: string): number {
   return routeCounts.value[themeId] ?? 0
 }
 const sampleUrl = computed(() => `#/${lang.value}/${project.value.default_theme}/`)
+const YEAR = new Date().getFullYear()
 
-// Video (UI-SPEC 2.3): decided once at mount so that phones never fetch a byte of it. A failed
+// Video (UI-SPEC 2.3): decided once at mount so that phones never fetch a byte of it. Only the
+// metadata is preloaded; playback starts on `canplay` and the poster shows until then. A failed
 // load falls back to the poster, a failed poster to the flat night background.
 const POSTER_URL = `${import.meta.env.BASE_URL}landing/poster.jpg`
 const VIDEO_URL = `${import.meta.env.BASE_URL}landing/hero.mp4`
@@ -57,6 +59,10 @@ const video = ref<HTMLVideoElement | null>(null)
 onMounted(() => {
   videoEnabled.value = shouldLoadVideo(browserVideoConditions())
 })
+function startVideo(): void {
+  const v = video.value
+  if (v && v.paused && !paused.value) void v.play()
+}
 function toggleVideo(): void {
   const v = video.value
   if (!v) return
@@ -79,10 +85,11 @@ function scrollToAbout(): void {
           v-if="videoEnabled"
           ref="video"
           muted
-          autoplay
           loop
           playsinline
+          preload="metadata"
           :poster="POSTER_URL"
+          @canplay="startVideo"
           @error="videoEnabled = false"
         >
           <source :src="VIDEO_URL" type="video/mp4" @error="videoEnabled = false" />
@@ -195,6 +202,16 @@ function scrollToAbout(): void {
         <p class="promise-text">{{ t('landing.disclaimerText') }}</p>
       </div>
     </section>
+
+    <footer class="footer">
+      <RouterLink :to="{ name: 'statement', params: { lang, page: 'accessibility' } }">
+        {{ t('footer.accessibility') }}
+      </RouterLink>
+      <RouterLink :to="{ name: 'statement', params: { lang, page: 'privacy' } }">
+        {{ t('footer.privacy') }}
+      </RouterLink>
+      <span>{{ t('footer.copyright', { year: YEAR, name: text(project.name) }) }}</span>
+    </footer>
   </div>
 </template>
 
@@ -495,6 +512,25 @@ function scrollToAbout(): void {
   flex: 0 1 250px;
 }
 
+/* Footer (UI-SPEC 2.1): statement links and the copyright line. */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-8) var(--gap-22);
+  padding: 22px 34px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-snow);
+  font: 400 12px/1.4 var(--font-family);
+  color: var(--color-ink-muted);
+}
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-river);
+}
+
 /* Mobile (UI-SPEC 2.2): poster only, vertical gradient, theme rows, footer block. */
 @media (max-width: 699px) {
   .hero {
@@ -617,6 +653,9 @@ function scrollToAbout(): void {
     flex-direction: column;
     gap: var(--gap-22);
     padding: 36px 18px;
+  }
+  .footer {
+    padding: 18px;
   }
   .about-text,
   .disclaimer {

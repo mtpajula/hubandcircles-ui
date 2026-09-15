@@ -2,21 +2,19 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import HubLogo from '../components/HubLogo.vue'
 import LanguageSwitch from '../components/LanguageSwitch.vue'
-import ReportButton from '../components/ReportButton.vue'
+import SiteBrand from '../components/SiteBrand.vue'
 import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import { useCatalog } from '../composables/useCatalog'
 import { availableLanguages } from '../i18n'
-import { langText } from '../i18n/language'
 import MapView from '../map/MapView.vue'
 import { applyTheme } from '../theme'
 import type { Catalog } from '../types/catalog'
 import type { NearbyService } from '../types/route'
 
 /**
- * Map page (UI-SPEC 3.1): header with logo, theme pills, report button and language switch;
- * sidebar with the route list (RouteList) or the route card (RouteCard); the map fills the rest.
+ * Map page (UI-SPEC 3.1): header with the brand link, theme pills and language switch (no
+ * report button since AP39); sidebar with the route list (RouteList) or the route card (RouteCard); the map fills the rest.
  * The sidebar widens to 560 px when a route is open (UI-SPEC 4.2). This page owns the
  * highlighted route and passes it to the list and the map as props/v-model.
  */
@@ -41,13 +39,6 @@ const theme = computed(() => props.catalog.themes.find((x) => x.id === themeId.v
 const openRoute = computed(() => (route.name === 'route' ? String(route.params.id) : null))
 const languages = computed(() => availableLanguages(props.catalog.project.languages))
 
-const projectName = computed(() =>
-  langText(props.catalog.project.name, lang.value, defaultLang.value),
-)
-const projectSubtitle = computed(() =>
-  langText(props.catalog.project.subtitle, lang.value, defaultLang.value),
-)
-
 watch(theme, (next) => applyTheme(next), { immediate: true })
 watch(themeId, () => (highlighted.value = null))
 watch(openRoute, () => {
@@ -61,13 +52,7 @@ watch(openRoute, () => {
 <template>
   <div class="page">
     <header class="header">
-      <div class="brand">
-        <HubLogo class="brand-logo" :themes="themesInOrder" :selected="theme?.id" :size="36" />
-        <div class="brand-text">
-          <span class="brand-name">{{ projectName }}</span>
-          <span class="brand-subtitle">{{ projectSubtitle }}</span>
-        </div>
-      </div>
+      <SiteBrand :catalog="catalog" :lang="lang" :selected="theme?.id" />
       <ThemeSwitcher
         :themes="themesInOrder"
         :current="themeId"
@@ -75,7 +60,6 @@ watch(openRoute, () => {
         :default-lang="defaultLang"
       />
       <div class="right">
-        <ReportButton />
         <LanguageSwitch :languages="languages" :current="lang" />
       </div>
     </header>
@@ -128,29 +112,10 @@ watch(openRoute, () => {
   height: var(--header-height);
   padding: 0 20px;
   box-sizing: border-box;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-white);
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: var(--gap-10);
-  min-width: 0;
-}
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.brand-name {
-  font: 700 16px/1.2 var(--font-family);
-  color: var(--color-ink);
-  white-space: nowrap;
-}
-.brand-subtitle {
-  font: var(--text-caption);
-  color: var(--color-ink-muted);
-  white-space: nowrap;
+  border-bottom: 1px solid var(--border-card);
+  /* Theme identity (UI-SPEC 1.1): the card surface tinted with the theme primary at 10 %. */
+  background-color: var(--surface-card);
+  background-image: linear-gradient(var(--theme-primary-10), var(--theme-primary-10));
 }
 .right {
   display: flex;
@@ -168,8 +133,9 @@ watch(openRoute, () => {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: var(--color-snow);
-  border-right: 1px solid var(--color-border);
+  background: var(--surface-page);
+  border-top: 4px solid var(--theme-primary); /* sidebar header stripe (UI-SPEC 1.1) */
+  border-right: 1px solid var(--border-card);
 }
 .body.route-open {
   --sidebar-width: var(--sidebar-width-route);
@@ -192,10 +158,6 @@ watch(openRoute, () => {
     gap: var(--gap-10);
     padding: 0 14px;
   }
-  .brand-logo,
-  .brand-subtitle {
-    display: none;
-  }
   .body {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: var(--map-strip-height) auto;
@@ -205,7 +167,6 @@ watch(openRoute, () => {
   }
   .sidebar {
     border-right: 0;
-    border-top: 1px solid var(--color-border);
   }
   .sidebar-content {
     overflow: visible;

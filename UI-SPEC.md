@@ -42,8 +42,15 @@ theme (design uses `#C9A96B` for gravel; compute as 50% mix with white). Tinted 
 list cards: mtb `#F3F0F7`/text `#4A3163`, gravel border `#E4DCCB`, road border `#EDD9DB`,
 touring border `#D9E3DB`, mtb border `#E3DCEC`.
 
-Dark theme (`theme.dark === true`, winter): cards on `--color-night`, text white, muted `#9FB6C8`,
-image placeholder `#22384A/#1E3243`.
+Dark theme (`theme.dark === true`, winter): the whole map page turns dark – header and sidebar
+`--color-night`, cards `#1E3243` with border `#2C425A`, text `--color-on-night`, muted `#9FB6C8`,
+image placeholder `#22384A`, chips/tiles/share-bar tracks on `#22384A`, legend and layer picker
+`#1E3243F2`. The map itself is NOT dimmed. On dark surfaces `--theme-primary` is too dark for text, so values and
+the theme chip use `--theme-accent` (primary mixed 50 % with white, ≥ 4.5:1), links a 50 % river
+tint, and ITRS badges get a 1 px hairline border so the black level stays visible. Theme identity must be visible in every theme: header
+background tinted `--theme-primary-10`, the active theme pill filled with `--theme-primary` (white
+text), sidebar header stripe 4 px `--theme-primary`, route list card left border 4 px
+`--theme-primary` (already), key-figure values in `--theme-primary`.
 
 ### 1.3 ITRS palette (only for ITRS badges, filters and technical band)
 
@@ -139,7 +146,14 @@ A user arriving at a map URL never sees this page.
   h3 700 30 "Harrastajien kokoama sivusto", two paragraphs 400 16/1.6 `#2A3A49`, sample
   `MaintenanceNotice` pill + "tältä merkintä näyttää". Right: 2×2 grid (gap 14) of promise cards
   (border, radius 9, padding 16): "Vie reitti mukaasi", "Vaativuus sanoina", "Pinta ja liikenne",
-  "Kerro korjauksista" – title 700 16, text 400 14/1.55.
+  "Lähteet näkyvissä" (was "Kerro korjauksista" until AP39) – title 700 16, text 400 14/1.55.
+- Header brand (logo + name + subtitle) on every page is a link to `#/` (landing), `aria-label`
+  "Etusivulle".
+- Footer (below section 3, padding 22/34, bg `--color-snow`, border-top, 400 12 muted): links
+  "Saavutettavuusseloste" → `#/<lang>/accessibility` and "Tietosuojaseloste" → `#/<lang>/privacy`,
+  plus "© <year> Napa ja piirit". The two statement pages are plain document pages (max-width 720,
+  padding 40/34, headings 700 22/16, text 400 15/1.6) with the site header and a back link; their
+  content lives in the locale files (`page.accessibility.*`, `page.privacy.*`).
 - Section 3 (padding 36/34/40, bg `--color-snow`): "Mistä tiedot tulevat" (420 col) + wrapped
   source list 400 13 (`© OpenStreetMap-tekijät (ODbL)`, `© Maanmittauslaitos, maastokartta
   (CC BY 4.0)`, `© Luonnonvarakeskus, satoennusteet`, `Kunnan reittirekisteri (Lipas)`,
@@ -164,7 +178,9 @@ Files in `public/landing/`: `hero.mp4` (H.264, 1280×720, 24 fps, muted, 39 s, 4
 `<video muted autoplay loop playsinline poster="landing/poster.jpg"><source src="landing/hero.mp4" type="video/mp4"></video>`.
 WebM is optional and currently absent (H.264 is universally supported; a second file would break
 the bandwidth budget). Not loaded on viewports < 700 px, on `prefers-reduced-motion`, or when
-`navigator.connection.saveData` / `effectiveType` is 2g/3g. Missing files → poster; missing poster
+`navigator.connection.saveData` is on or `effectiveType` is `slow-2g`/`2g` (3g and wired networks
+misreported as 3g DO get the video: `preload="metadata"`, playback starts on `canplay`; until then
+the poster shows). Missing files → poster; missing poster
 → flat `--color-night`. The footage is bright (autumn birch, blue sky): the hero gradient overlay
 (§2.1) is what guarantees text contrast and must not be weakened. Keep any future re-cut's action
 on the right third of the frame; the left third is darkened.
@@ -180,8 +196,7 @@ on the right third of the frame; the left third is darkened.
   10 px color dot + name 600 13. Inactive: white bg, border 1.5px `--color-border`, text
   `--color-ink-soft`. Active: bg `--theme-primary-10`, border 1.5px theme, text theme color.
   Names always visible (never color only). `aria-pressed`.
-- Right group: `ReportButton` pill 36 h "Ilmoita ongelmasta" with inline hint 400 11 muted
-  "vaatii GitHub-tunnuksen"; language segment FI|EN (36 h, active `--color-ink` bg white text
+- Right group: language segment FI|EN (the `ReportButton` was removed 15.9.2026, AP39) (36 h, active `--color-ink` bg white text
   700 13, inactive text `--color-ink-soft` 600 13).
 - Body: sidebar 404 wide, `--color-snow`, border-right; map fills the rest.
 

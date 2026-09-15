@@ -73,10 +73,10 @@ function clear(): void {
   display: flex;
   gap: var(--gap-12);
   padding: 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-left: 4px solid var(--theme-route-other);
   border-radius: var(--radius-card);
-  background: var(--color-white);
+  background: var(--surface-card);
   color: inherit;
   text-decoration: none;
 }
@@ -93,7 +93,7 @@ function clear(): void {
 }
 .placeholder {
   display: block;
-  background: var(--color-border-soft);
+  background: var(--surface-placeholder);
 }
 .column {
   display: flex;
@@ -108,6 +108,6 @@ function clear(): void {
   align-items: center;
   gap: var(--gap-6) var(--gap-8);
   font: var(--text-card-title);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 </style>

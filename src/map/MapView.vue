@@ -782,11 +782,11 @@ watch(layerState, () => {
   z-index: 1;
   margin: 0;
   padding: 8px 12px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-control);
-  color: var(--color-ink);
+  color: var(--text-strong);
   font: 600 13px/1.2 var(--font-family);
   pointer-events: none;
 }
@@ -811,9 +811,9 @@ watch(layerState, () => {
   z-index: 1;
   margin: 0;
   padding: 3px 8px;
-  background: var(--color-white-86);
+  background: var(--surface-attribution);
   border-radius: var(--radius-badge) 0 0 0;
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
   font: 400 11px/1.4 var(--font-family);
 }
 
@@ -825,21 +825,26 @@ watch(layerState, () => {
   margin: 10px 10px 0 0;
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-control);
-  background: var(--color-white);
+  background: var(--surface-card);
 }
 .frame :deep(.maplibregl-ctrl-group button) {
   width: 38px;
   height: 38px;
 }
+/* Dark theme: MapLibre's zoom glyphs are dark SVGs; invert them on the dark tile. */
+[data-theme-dark] .frame :deep(.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon),
+[data-theme-dark] .frame :deep(.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon) {
+  filter: invert(1);
+}
 .frame :deep(.maplibregl-ctrl-group button + button) {
-  border-top: 1px solid var(--color-border-soft);
+  border-top: 1px solid var(--border-hairline);
 }
 .frame :deep(.layers-button) {
-  color: var(--color-river);
+  color: var(--text-link);
   font: 600 12px/1 var(--font-family);
 }
 .frame :deep(.layers-button:disabled) {
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
   cursor: default;
 }
 .frame :deep(.layers-button[aria-expanded='true']) {

@@ -1,10 +1,10 @@
 <script setup lang="ts">
+// ponytail: unused since AP39
 import { useI18n } from 'vue-i18n'
 
 /**
- * Issue report entry point (UI-SPEC 3.1). Placeholder in V1: the pill and its hint are shown so
- * the header layout is final; the report flow (location pick, preview, GitHub form) comes with
- * the feedback feature. The button is disabled until then.
+ * Issue report entry point. Not rendered anywhere since the public feedback channel was dropped
+ * (ARKKITEHTUURI AP39, 15.9.2026); kept in case the decision is revisited.
  */
 const { t } = useI18n()
 </script>
@@ -12,7 +12,6 @@ const { t } = useI18n()
 <template>
   <span class="report">
     <button type="button" class="pill" disabled>{{ t('report.button') }}</button>
-    <span class="hint">{{ t('report.requiresGithub') }}</span>
   </span>
 </template>
 
@@ -34,15 +33,5 @@ const { t } = useI18n()
 }
 .pill:disabled {
   opacity: 0.6;
-}
-.hint {
-  color: var(--color-ink-muted);
-  font: var(--text-caption);
-  white-space: nowrap;
-}
-@media (max-width: 899px) {
-  .hint {
-    display: none;
-  }
 }
 </style>

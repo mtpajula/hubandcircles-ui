@@ -5,8 +5,9 @@ import { useRoute } from 'vue-router'
 import { useCatalog } from './composables/useCatalog'
 import { setLanguage } from './i18n'
 import { langText } from './i18n/language'
+import { applyTheme } from './theme'
 
-/** App shell: catalog loading and error states, language sync, then the routed page. */
+/** App shell: catalog loading and error states, language sync, document title, then the routed page. */
 const { t, locale } = useI18n()
 const route = useRoute()
 const { state, catalog, errorKey } = useCatalog()
@@ -18,10 +19,22 @@ const projectName = computed(() =>
     : '',
 )
 
-watch(lang, (l) => setLanguage(l), { immediate: true })
-watch(projectName, (name) => {
-  document.title = name || t('app.title')
+/** Statement pages prefix the project name with their own title; other pages use the name. */
+const title = computed(() => {
+  const name = projectName.value || t('app.title')
+  return route.name === 'statement' ? `${t(`page.${route.params.page}.title`)} – ${name}` : name
 })
+
+watch(lang, (l) => setLanguage(l), { immediate: true })
+watch(title, (next) => (document.title = next), { immediate: true })
+// Only the map page applies a theme; the other pages reset to the light base look.
+watch(
+  () => route.name,
+  (name) => {
+    if (name === 'landing' || name === 'statement') applyTheme(null)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>

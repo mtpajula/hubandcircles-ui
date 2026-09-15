@@ -86,9 +86,9 @@ function label(id: string): string {
 .bar {
   display: flex;
   overflow: hidden;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
-  background: var(--color-snow);
+  background: var(--surface-inset);
 }
 .part {
   display: block;
@@ -107,11 +107,11 @@ function label(id: string): string {
   align-items: center;
   gap: var(--gap-6);
   padding: 4px 9px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-chip);
-  background: var(--color-white);
+  background: var(--surface-inset);
   font: 600 12px/1.2 var(--font-family);
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
 }
 .swatch {
   width: 11px;
@@ -137,7 +137,7 @@ function label(id: string): string {
   border: 0;
   background: none;
   font: var(--text-caption);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .compact .item + .item::before {
   content: '·';

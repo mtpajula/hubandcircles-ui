@@ -92,12 +92,12 @@ function show(row: { id: string; km: number }) {
   font: var(--text-eyebrow);
   letter-spacing: var(--text-eyebrow-spacing);
   text-transform: uppercase;
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .caption {
   margin: -4px 0 0;
   font: var(--text-caption-lg);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .rows {
   list-style: none;
@@ -115,10 +115,10 @@ function show(row: { id: string; km: number }) {
   min-height: 44px;
   padding: 9px 11px;
   box-sizing: border-box;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-box);
-  background: var(--color-white);
-  color: var(--color-ink);
+  background: var(--surface-card);
+  color: var(--text-strong);
   text-align: left;
   cursor: pointer;
 }
@@ -135,7 +135,7 @@ function show(row: { id: string; km: number }) {
 .km {
   flex: none;
   font: var(--text-caption-lg);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .gap {
   display: flex;
@@ -144,18 +144,18 @@ function show(row: { id: string; km: number }) {
   gap: var(--gap-4) var(--gap-9);
   padding: 10px 12px;
   border-radius: var(--radius-box);
-  background: var(--color-snow);
+  background: var(--surface-inset);
 }
 .gap-title {
   font: 400 13px/1.3 var(--font-family);
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
 }
 .gap-value {
   font: 700 15px/1.2 var(--font-family);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .gap-range {
   font: var(--text-caption-lg);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 </style>

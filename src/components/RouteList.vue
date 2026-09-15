@@ -87,7 +87,7 @@ watch(highlighted, (id) => {
   margin: 0;
   padding: 13px 18px;
   font: var(--text-body);
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
 }
 .list {
   list-style: none;

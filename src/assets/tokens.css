@@ -66,7 +66,11 @@
   --theme-highlight: var(--color-midnight-sun);
   --theme-primary-10: #2f6f7e1a;
   --theme-route-other: #8d95a0;
+  --theme-primary-tint: #97b7bf;
   --theme-shadow: var(--shadow-card);
+  /* Theme color for text on the page surface: the primary itself on light surfaces, the 50 %
+   * white tint on dark ones (winter primary #2F5F96 on #1E3243 is only 2:1). */
+  --theme-accent: var(--theme-primary);
 
   /* 1.3 ITRS palette: badges, filters and the technical band only, never route lines. */
   --itrs-green: #2f7d46;
@@ -147,6 +151,47 @@
   --motion-fast: 150ms;
 }
 
+/* Semantic surface and text tokens. Light values by default; the dark theme (UI-SPEC 1.1,
+ * `theme.dark`, attribute set by src/theme.ts) swaps them below. Components that sit on the page
+ * surface use these; things on the map or on a fixed-color fill (badges, filled chips, markers)
+ * keep the base tokens, because the map is never dimmed. */
+:root {
+  --surface-page: var(--color-snow);
+  --surface-card: var(--color-white);
+  --surface-inset: var(--color-white);
+  --surface-placeholder: var(--color-border-soft);
+  --surface-overlay: var(--color-white-92);
+  --surface-attribution: var(--color-white-86);
+  --surface-inverse: var(--color-ink);
+  --border-card: var(--color-border);
+  --border-hairline: var(--color-border-soft);
+  --text-strong: var(--color-ink);
+  --text-soft: var(--color-ink-soft);
+  --text-muted: var(--color-ink-muted);
+  --text-prose: var(--color-ink-prose);
+  --text-inverse: var(--color-white);
+  --text-link: var(--color-river);
+}
+[data-theme-dark] {
+  color-scheme: dark;
+  --surface-page: var(--color-night);
+  --surface-card: #1e3243;
+  --surface-inset: #22384a;
+  --surface-placeholder: #22384a;
+  --surface-overlay: #1e3243f2;
+  --surface-attribution: #1e3243db;
+  --surface-inverse: var(--color-on-night);
+  --border-card: #2c425a;
+  --border-hairline: #2c425a;
+  --text-strong: var(--color-on-night);
+  --text-soft: var(--color-on-night-muted);
+  --text-muted: var(--color-on-night-faint);
+  --text-prose: var(--color-on-night);
+  --text-inverse: var(--color-night);
+  --text-link: #97b7bf; /* river mixed 50 % with white: 6.2:1 on the card */
+  --theme-accent: var(--theme-primary-tint);
+}
+
 html {
   color-scheme: light;
   font-family: var(--font-family);
@@ -156,12 +201,12 @@ html {
 
 body {
   margin: 0;
-  background: var(--color-snow);
-  color: var(--color-ink);
+  background: var(--surface-page);
+  color: var(--text-strong);
 }
 
 a {
-  color: var(--color-river);
+  color: var(--text-link);
 }
 
 button {

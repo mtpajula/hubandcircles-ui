@@ -6,7 +6,8 @@
     "map": "Map"
   },
   "nav": {
-    "backToTheme": "← {name} · {n} route | ← {name} · {n} routes"
+    "backToTheme": "← {name} · {n} route | ← {name} · {n} routes",
+    "home": "Home"
   },
   "lang": {
     "select": "Language",
@@ -64,8 +65,7 @@
     "legendPrimary": "theme priority"
   },
   "report": {
-    "button": "Report a problem",
-    "requiresGithub": "requires a GitHub account"
+    "button": "Report a problem"
   },
   "landing": {
     "title": "Rovaniemi cycling routes on one map",
@@ -90,8 +90,8 @@
     "promise2Text": "Difficulty is given in words and as an ITRS grade, never as color alone. Climbs and lengths come from the recorded track.",
     "promise3Title": "Surface and traffic",
     "promise3Text": "The route card shows how much is asphalt, gravel and trail, and where you share the road with cars.",
-    "promise4Title": "Report corrections",
-    "promise4Text": "A fallen tree, a new fence or a wrong surface? Every route has a button for reporting a correction.",
+    "promise4Title": "Sources in the open",
+    "promise4Text": "Every map layer and service shows where the data comes from and when it was fetched.",
     "sourcesTitle": "Where the data comes from",
     "sourcesText": "Map data and surface information come from open sources. Route tracks and descriptions are the riders' own. Sources and their retrieval dates:",
     "source1": "© OpenStreetMap contributors (ODbL)",
@@ -104,6 +104,40 @@
     "footerTitle": "Built by local riders",
     "footerNote": "Not a municipal service. You ride at your own risk.",
     "readMore": "Read more ↓"
+  },
+  "footer": {
+    "accessibility": "Accessibility statement",
+    "privacy": "Privacy statement",
+    "copyright": "© {year} {name}"
+  },
+  "page": {
+    "accessibility": {
+      "title": "Accessibility statement",
+      "intro": "Napa ja piirit / Hub & Circles is a volunteer-run site about cycling routes around Rovaniemi. It aims to meet WCAG 2.1 level AA. This statement is the site's own assessment, written on 15 September 2026.",
+      "statusTitle": "Status",
+      "status": "The site meets the requirements for the most part. Text, buttons, forms and route cards work with a keyboard and a screen reader, colour is never the only carrier of information (ITRS levels always have a number and a name), and motion can be disabled with the operating system setting (prefers-reduced-motion).",
+      "issuesTitle": "Known issues",
+      "issues": [
+        "The map is WebGL graphics that a screen reader cannot browse. Route details, services and the elevation profile are available as text on the route card, and the GPX file can be downloaded.",
+        "The elevation band cursor moves with the arrow keys; its values are exposed as aria attributes but are not announced on every step.",
+        "The landing page video has no sound or captions; it is decorative."
+      ],
+      "feedbackTitle": "Feedback",
+      "feedback": "If you find a barrier, please tell us in the site's GitHub repository. There is no separate feedback form.",
+      "repoLabel": "Site data on GitHub"
+    },
+    "privacy": {
+      "title": "Privacy statement",
+      "intro": "Napa ja piirit does not collect personal data. There are no user accounts, forms, cookies or visitor tracking.",
+      "storageTitle": "Data stored in your browser",
+      "storage": "The site stores only preferences in your browser's local storage: the chosen theme and language, map layer choices, and whether you paused the landing page video. Nothing is sent anywhere, and the data is removed when you clear the browser's site data.",
+      "thirdTitle": "Third-party services",
+      "third": "The map loads map tiles directly from their providers, so their servers see your IP address and the requested tiles: the OpenStreetMap Foundation (background map), the City of Rovaniemi (guide, base and aerial maps) and the site's own publication on GitHub Pages (National Land Survey topographic tiles, routes and images). The site uses no analytics or advertising networks.",
+      "hostingTitle": "Hosting",
+      "hosting": "The site is published on GitHub Pages. GitHub may log IP addresses under its own privacy policy.",
+      "contactTitle": "Contact",
+      "contact": "The site is maintained by a private individual. Questions can be raised in the site's GitHub repository."
+    }
   },
   "maintenance": {
     "notice": "Not municipally maintained",

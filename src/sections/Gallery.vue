@@ -82,7 +82,7 @@ function onDialogClick(e: MouseEvent): void {
   font: var(--text-eyebrow);
   letter-spacing: var(--text-eyebrow-spacing);
   text-transform: uppercase;
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .grid {
   display: grid;
@@ -99,7 +99,7 @@ function onDialogClick(e: MouseEvent): void {
   border: 0;
   border-radius: var(--radius-image);
   overflow: hidden;
-  background: var(--color-border-soft);
+  background: var(--surface-placeholder);
   cursor: zoom-in;
 }
 .thumb img {

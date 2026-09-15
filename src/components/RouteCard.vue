@@ -370,7 +370,7 @@ const blocks = computed(() =>
 }
 .back {
   font: 600 14px/1.2 var(--font-family);
-  color: var(--color-river);
+  color: var(--text-link);
   text-decoration: none;
 }
 .back:hover {
@@ -379,7 +379,7 @@ const blocks = computed(() =>
 .status {
   margin: 0;
   font: var(--text-body);
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
 }
 .body {
   display: flex;
@@ -394,7 +394,7 @@ const blocks = computed(() =>
 .title {
   margin: 0;
   font: var(--text-page-title);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .chips {
   display: flex;
@@ -405,17 +405,17 @@ const blocks = computed(() =>
   padding: 6px 11px;
   border-radius: var(--radius-chip);
   font: 600 12px/1.2 var(--font-family);
-  color: var(--color-ink-soft);
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  color: var(--text-soft);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-card);
 }
 .theme-chip {
-  color: var(--theme-primary);
+  color: var(--theme-accent);
   background: var(--theme-primary-10);
   border-color: transparent;
 }
 .season-chip {
-  background: var(--color-snow);
+  background: var(--surface-inset);
   border-color: transparent;
 }
 .block {
@@ -428,12 +428,12 @@ const blocks = computed(() =>
   font: var(--text-eyebrow);
   letter-spacing: var(--text-eyebrow-spacing);
   text-transform: uppercase;
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .caption {
   margin: -4px 0 0;
   font: var(--text-caption-lg);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .cover {
   display: block;
@@ -441,11 +441,11 @@ const blocks = computed(() =>
   aspect-ratio: 3 / 2;
   object-fit: cover;
   border-radius: var(--radius-panel);
-  background: var(--color-border-soft);
+  background: var(--surface-placeholder);
 }
 .description {
   font: var(--text-body);
-  color: var(--color-ink-prose);
+  color: var(--text-prose);
 }
 .description :deep(p) {
   margin: 0;
@@ -458,9 +458,9 @@ const blocks = computed(() =>
   width: 100%;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-panel);
-  background: var(--color-white);
+  background: var(--surface-card);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -494,15 +494,15 @@ button.hardest:focus-visible {
 }
 .hardest-km {
   font: 700 14px/1.2 var(--font-family);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 .hardest-description {
   font: 400 14px/1.5 var(--font-family);
-  color: var(--color-ink-prose);
+  color: var(--text-prose);
 }
 .hardest-hint {
   font: 400 12px/1.4 var(--font-family);
-  color: var(--color-river);
+  color: var(--text-link);
 }
 
 /* Mobile route card (UI-SPEC 5.1) */
@@ -517,7 +517,7 @@ button.hardest:focus-visible {
   object-fit: cover;
 }
 .placeholder {
-  background: var(--color-border-soft);
+  background: var(--surface-placeholder);
 }
 .back-pill {
   position: absolute;
@@ -548,9 +548,9 @@ button.hardest:focus-visible {
   height: 24px;
   padding: 0 10px;
   border-radius: 12px;
-  background: var(--color-white-92);
+  background: var(--surface-overlay);
   font: 700 12px/1 var(--font-family);
-  color: var(--color-ink);
+  color: var(--text-strong);
 }
 @media (max-width: 699px) {
   .panel {

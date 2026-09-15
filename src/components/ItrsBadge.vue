@@ -39,4 +39,8 @@ const fill = computed(() => `var(--itrs-${props.level ?? 'none'})`)
   padding: 3px 7px;
   font: 700 11px/1.2 var(--font-family);
 }
+/* Dark theme: the black level would merge with the card, so every badge gets the card border. */
+[data-theme-dark] .badge {
+  box-shadow: inset 0 0 0 1px var(--border-card);
+}
 </style>

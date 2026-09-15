@@ -11,8 +11,8 @@ export function cssVar(name: string): string {
 /**
  * The only place that writes theme colors into CSS variables (components do not know themes by
  * name). `null` is the `all` pseudo-theme: base colors river/ink stand in for the theme.
- * Derived values (`--theme-primary-10`, `--theme-route-other`) are computed here as plain hex so
- * that the same values work as MapLibre paint properties.
+ * Derived values (`--theme-primary-10`, `--theme-route-other`, `--theme-primary-tint`) are
+ * computed here as plain hex so that the same values work as MapLibre paint properties.
  */
 export function applyTheme(theme: Theme | null): void {
   const html = document.documentElement
@@ -25,6 +25,7 @@ export function applyTheme(theme: Theme | null): void {
   style.setProperty('--theme-highlight', highlight)
   style.setProperty('--theme-primary-10', withAlpha(primary, 0.1))
   style.setProperty('--theme-route-other', mixWithWhite(route, 0.5))
+  style.setProperty('--theme-primary-tint', mixWithWhite(primary, 0.5))
   style.setProperty('--theme-shadow', `0 3px 10px ${withAlpha(primary, 0.16)}`)
   html.toggleAttribute(DARK_ATTRIBUTE, theme?.dark === true)
 }

@@ -105,9 +105,9 @@ const scales = computed(() => {
   gap: var(--gap-4);
   min-width: 0;
   padding: 11px 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
-  background: var(--color-white);
+  background: var(--surface-inset);
 }
 .wide {
   grid-column: 1 / -1;
@@ -115,16 +115,16 @@ const scales = computed(() => {
 }
 .label {
   font: var(--text-caption);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .value {
   font: var(--text-key-figure);
-  color: var(--color-ink);
+  color: var(--theme-accent); /* theme identity in every theme (UI-SPEC 1.1) */
 }
 .footnote {
   margin: 0;
   font: var(--text-caption-lg);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 @media (max-width: 699px) {
   .tile {

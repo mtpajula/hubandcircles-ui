@@ -222,9 +222,9 @@ function onKey(e: KeyboardEvent): void {
   flex-direction: column;
   gap: var(--gap-6);
   padding: 11px 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-panel);
-  background: var(--color-white);
+  background: var(--surface-card);
 }
 .stack {
   position: relative;
@@ -274,7 +274,7 @@ function onKey(e: KeyboardEvent): void {
   bottom: 0;
   width: 1.5px;
   margin-left: -0.75px;
-  background: var(--color-ink);
+  background: var(--text-strong);
   pointer-events: none;
 }
 .tooltip {
@@ -283,8 +283,8 @@ function onKey(e: KeyboardEvent): void {
   left: 6px;
   padding: 4px 7px;
   border-radius: var(--radius-tooltip);
-  background: var(--color-ink);
-  color: var(--color-white);
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
   font: 600 11px/1.35 var(--font-family);
   white-space: nowrap;
 }
@@ -297,7 +297,7 @@ function onKey(e: KeyboardEvent): void {
   justify-content: space-between;
   height: 18px;
   font: var(--text-caption);
-  color: var(--color-ink-muted);
+  color: var(--text-muted);
 }
 .legend {
   display: flex;
@@ -307,7 +307,7 @@ function onKey(e: KeyboardEvent): void {
   padding: 0;
   list-style: none;
   font: var(--text-caption);
-  color: var(--color-ink-soft);
+  color: var(--text-soft);
 }
 .legend-item {
   display: inline-flex;
