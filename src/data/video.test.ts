@@ -1,22 +1,32 @@
 import { describe, expect, it } from 'vitest'
-import { embedUrl, shouldLoadVideo } from './video'
+import { embedUrl, shouldAutoplay, shouldLoadVideo } from './video'
 
 const desktop = { width: 1440, reducedMotion: false, saveData: false, effectiveType: '4g' }
 
 describe('shouldLoadVideo', () => {
-  // UI-SPEC 2.3 gating table: only narrow viewports, reduced motion, save-data and 2g stop it.
+  // UI-SPEC 2.3 gating table: only narrow viewports and save-data stop the load; connection
+  // type is ignored and reduced motion only stops the autoplay.
   it.each([
     ['wide viewport, 4g', desktop, true],
     ['unknown connection type', { ...desktop, effectiveType: undefined }, true],
     ['3g (wired networks are misreported as 3g)', { ...desktop, effectiveType: '3g' }, true],
+    ['2g (connection guesses are ignored)', { ...desktop, effectiveType: '2g' }, true],
     ['699 px', { ...desktop, width: 699 }, false],
     ['700 px', { ...desktop, width: 700 }, true],
-    ['prefers-reduced-motion', { ...desktop, reducedMotion: true }, false],
+    [
+      'prefers-reduced-motion (loads, does not autoplay)',
+      { ...desktop, reducedMotion: true },
+      true,
+    ],
     ['save-data', { ...desktop, saveData: true }, false],
-    ['2g', { ...desktop, effectiveType: '2g' }, false],
-    ['slow-2g', { ...desktop, effectiveType: 'slow-2g' }, false],
   ])('%s → %s', (_name, conditions, expected) => {
     expect(shouldLoadVideo(conditions)).toBe(expected)
+  })
+
+  it('autoplays only without reduced motion', () => {
+    expect(shouldAutoplay(desktop)).toBe(true)
+    expect(shouldAutoplay({ ...desktop, reducedMotion: true })).toBe(false)
+    expect(shouldAutoplay({ ...desktop, width: 600 })).toBe(false)
   })
 })
 

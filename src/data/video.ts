@@ -1,10 +1,6 @@
 /** Viewports narrower than this get the poster only (UI-SPEC 2.2, 2.3). */
 export const VIDEO_MIN_WIDTH = 700
 
-/** Connection types on which the hero video is not worth its bytes (UI-SPEC 2.3). `3g` is not
- * listed: wired networks are often misreported as 3g, and the video only preloads its metadata. */
-const SLOW_CONNECTIONS = ['slow-2g', '2g']
-
 export interface VideoConditions {
   width: number
   reducedMotion: boolean
@@ -13,13 +9,17 @@ export interface VideoConditions {
 }
 
 /**
- * Whether the hero `<video>` is rendered at all. Anything else shows the poster, so no video bytes
- * are fetched on phones, with reduced motion, or on metered or very slow connections.
+ * Whether the hero `<video>` is rendered at all (UI-SPEC 2.3). Only phones and the data-saver
+ * setting get the poster alone; connection-type guesses were dropped because wired office
+ * networks are routinely misreported. Reduced motion does not block loading – see `shouldAutoplay`.
  */
 export function shouldLoadVideo(c: VideoConditions): boolean {
-  if (c.width < VIDEO_MIN_WIDTH) return false
-  if (c.reducedMotion || c.saveData) return false
-  return !SLOW_CONNECTIONS.includes(c.effectiveType ?? '')
+  return c.width >= VIDEO_MIN_WIDTH && !c.saveData
+}
+
+/** With reduced motion the video is loaded but starts only from the play button. */
+export function shouldAutoplay(c: VideoConditions): boolean {
+  return shouldLoadVideo(c) && !c.reducedMotion
 }
 
 /** Reads the conditions from the browser. Only called in the browser, from a component. */

@@ -8,7 +8,7 @@ import MaintenanceNotice from '../components/MaintenanceNotice.vue'
 import { useCatalog } from '../composables/useCatalog'
 import { ALL_THEMES } from '../data/identifiers'
 import { countRoutesByTheme } from '../data/routes'
-import { browserVideoConditions, shouldLoadVideo } from '../data/video'
+import { browserVideoConditions, shouldAutoplay, shouldLoadVideo } from '../data/video'
 import { availableLanguages, setLanguage } from '../i18n'
 import { langText, resolveLanguage } from '../i18n/language'
 import type { Catalog } from '../types/catalog'
@@ -47,21 +47,29 @@ function countOf(themeId: string): number {
 const sampleUrl = computed(() => `#/${lang.value}/${project.value.default_theme}/`)
 const YEAR = new Date().getFullYear()
 
-// Video (UI-SPEC 2.3): decided once at mount so that phones never fetch a byte of it. Only the
-// metadata is preloaded; playback starts on `canplay` and the poster shows until then. A failed
-// load falls back to the poster, a failed poster to the flat night background.
+// Video (UI-SPEC 2.3): decided once at mount so that phones never fetch a byte of it. `autoplay`
+// lets the browser start it as soon as it can; `startVideo` retries on `canplay` and, when the
+// browser refuses autoplay, leaves the poster with the play button offered. With reduced motion
+// the video loads but waits for the button. A failed load falls back to the poster.
 const POSTER_URL = `${import.meta.env.BASE_URL}landing/poster.jpg`
 const VIDEO_URL = `${import.meta.env.BASE_URL}landing/hero.mp4`
 const videoEnabled = ref(false)
 const posterOk = ref(true)
 const paused = ref(false)
 const video = ref<HTMLVideoElement | null>(null)
+const autoplay = ref(false)
 onMounted(() => {
-  videoEnabled.value = shouldLoadVideo(browserVideoConditions())
+  const conditions = browserVideoConditions()
+  videoEnabled.value = shouldLoadVideo(conditions)
+  autoplay.value = shouldAutoplay(conditions)
+  paused.value = !autoplay.value
 })
 function startVideo(): void {
   const v = video.value
-  if (v && v.paused && !paused.value) void v.play()
+  if (!v || !v.paused || paused.value) return
+  v.play().catch(() => {
+    paused.value = true // autoplay refused: the poster stays and the button says "Toista video"
+  })
 }
 function toggleVideo(): void {
   const v = video.value
@@ -87,7 +95,8 @@ function scrollToAbout(): void {
           muted
           loop
           playsinline
-          preload="metadata"
+          :autoplay="autoplay"
+          preload="auto"
           :poster="POSTER_URL"
           @canplay="startVideo"
           @error="videoEnabled = false"

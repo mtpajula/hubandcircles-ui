@@ -177,10 +177,11 @@ Files in `public/landing/`: `hero.mp4` (H.264, 1280×720, 24 fps, muted, 39 s, 4
 `poster.jpg` (186 kB, first second of the clip). Markup:
 `<video muted autoplay loop playsinline poster="landing/poster.jpg"><source src="landing/hero.mp4" type="video/mp4"></video>`.
 WebM is optional and currently absent (H.264 is universally supported; a second file would break
-the bandwidth budget). Not loaded on viewports < 700 px, on `prefers-reduced-motion`, or when
-`navigator.connection.saveData` is on or `effectiveType` is `slow-2g`/`2g` (3g and wired networks
-misreported as 3g DO get the video: `preload="metadata"`, playback starts on `canplay`; until then
-the poster shows). Missing files → poster; missing poster
+the bandwidth budget). Not loaded on viewports < 700 px or when `navigator.connection.saveData` is on. Connection-type
+guesses (`effectiveType`) are ignored (loosened 17.9.2026: an office Edge on a wired network got
+no video). `autoplay` + `preload="auto"`; `prefers-reduced-motion` loads the video but does not
+autoplay it – the pause button then reads "Toista video". If the browser refuses autoplay, the
+poster stays and the same button starts playback. Missing files → poster; missing poster
 → flat `--color-night`. The footage is bright (autumn birch, blue sky): the hero gradient overlay
 (§2.1) is what guarantees text contrast and must not be weakened. Keep any future re-cut's action
 on the right third of the frame; the left third is darkened.
